@@ -1,0 +1,11 @@
+# Switching species re-derives the index and the hourly curve.
+appId: ua.kliuye.app
+---
+- launchApp
+- assertVisible: 'Вид риби'
+- copyTextFrom:
+    id: 'bite-index-value'
+    optional: true
+- tapOn: 'Щука.*'
+- assertVisible: 'Щука.*'
+- assertVisible: 'По годинах'

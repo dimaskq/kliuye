@@ -1,0 +1,18 @@
+# Offline shows the cached forecast with its age, keeps the map drawn, and never crashes.
+appId: ua.kliuye.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: 'Індекс кльову'
+# Open the map with a connection: this is what fills the offline tile cache.
+- tapOn: 'Мапа'
+- assertVisible: 'Де будемо рибачити?'
+- setAirplaneMode: enabled
+- assertVisible: 'Немає зв.*'
+- assertVisible: 'Мапа водойм'
+- tapOn: 'Сьогодні'
+- swipe:
+    direction: DOWN
+- assertVisible: 'Дані від.*'
+- assertVisible: 'Індекс кльову'
+- setAirplaneMode: disabled

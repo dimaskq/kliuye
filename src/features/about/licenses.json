@@ -1,0 +1,247 @@
+[
+  {
+    "name": "@expo/metro-runtime",
+    "version": "57.0.14",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "@maplibre/maplibre-react-native",
+    "version": "11.4.0",
+    "license": "MIT",
+    "publisher": "MapLibre"
+  },
+  {
+    "name": "@react-native-async-storage/async-storage",
+    "version": "2.2.0",
+    "license": "MIT",
+    "publisher": "Krzysztof Borowy <contact@kborowy.com>"
+  },
+  {
+    "name": "@tanstack/query-async-storage-persister",
+    "version": "5.102.8",
+    "license": "MIT",
+    "publisher": "tannerlinsley"
+  },
+  {
+    "name": "@tanstack/react-query",
+    "version": "5.102.8",
+    "license": "MIT",
+    "publisher": "tannerlinsley"
+  },
+  {
+    "name": "@tanstack/react-query-persist-client",
+    "version": "5.102.8",
+    "license": "MIT",
+    "publisher": "tannerlinsley"
+  },
+  {
+    "name": "date-fns",
+    "version": "4.4.0",
+    "license": "MIT"
+  },
+  {
+    "name": "expo",
+    "version": "57.0.18",
+    "license": "MIT",
+    "publisher": "Expo"
+  },
+  {
+    "name": "expo-constants",
+    "version": "57.0.16",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-file-system",
+    "version": "57.0.6",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-font",
+    "version": "57.0.2",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-image-picker",
+    "version": "57.0.14",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-linking",
+    "version": "57.0.8",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-localization",
+    "version": "57.0.1",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-location",
+    "version": "57.0.14",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-network",
+    "version": "57.0.1",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-notifications",
+    "version": "57.0.15",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-router",
+    "version": "57.0.17",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-splash-screen",
+    "version": "57.0.8",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-status-bar",
+    "version": "57.0.1",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-system-ui",
+    "version": "57.0.3",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-video-thumbnails",
+    "version": "57.0.1",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-web-browser",
+    "version": "57.0.2",
+    "license": "MIT",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "i18next",
+    "version": "26.4.0",
+    "license": "MIT",
+    "publisher": "Jan Mühlemann <jan.muehlemann@gmail.com> (https://github.com/jamuhl)"
+  },
+  {
+    "name": "intl-pluralrules",
+    "version": "2.0.1",
+    "license": "ISC",
+    "publisher": "Eemeli Aro <eemeli@gmail.com>"
+  },
+  {
+    "name": "leaflet",
+    "version": "1.9.4",
+    "license": "BSD-2-Clause"
+  },
+  {
+    "name": "lucide-react-native",
+    "version": "1.37.0",
+    "license": "ISC",
+    "publisher": "Eric Fennis"
+  },
+  {
+    "name": "react",
+    "version": "19.2.3",
+    "license": "MIT"
+  },
+  {
+    "name": "react-dom",
+    "version": "19.2.3",
+    "license": "MIT"
+  },
+  {
+    "name": "react-i18next",
+    "version": "17.0.12",
+    "license": "MIT",
+    "publisher": "Jan Mühlemann <jan.muehlemann@gmail.com> (https://github.com/jamuhl)"
+  },
+  {
+    "name": "react-native",
+    "version": "0.86.3",
+    "license": "MIT"
+  },
+  {
+    "name": "react-native-gesture-handler",
+    "version": "2.32.0",
+    "license": "MIT",
+    "publisher": "Krzysztof Magiera"
+  },
+  {
+    "name": "react-native-reanimated",
+    "version": "4.5.1",
+    "license": "MIT",
+    "publisher": "Krzysztof Magiera"
+  },
+  {
+    "name": "react-native-safe-area-context",
+    "version": "5.7.0",
+    "license": "MIT",
+    "publisher": "Janic Duplessis <janicduplessis@gmail.com>"
+  },
+  {
+    "name": "react-native-screens",
+    "version": "4.26.2",
+    "license": "MIT",
+    "publisher": "Krzysztof Magiera"
+  },
+  {
+    "name": "react-native-svg",
+    "version": "15.15.4",
+    "license": "MIT"
+  },
+  {
+    "name": "react-native-web",
+    "version": "0.21.2",
+    "license": "MIT",
+    "publisher": "Nicolas Gallagher"
+  },
+  {
+    "name": "react-native-worklets",
+    "version": "0.10.1",
+    "license": "MIT"
+  },
+  {
+    "name": "zustand",
+    "version": "5.0.15",
+    "license": "MIT",
+    "publisher": "Paul Henschel"
+  },
+  {
+    "name": "Rubik",
+    "version": "OFL 1.1",
+    "license": "OFL-1.1",
+    "publisher": "The Rubik Project Authors"
+  },
+  {
+    "name": "Figtree",
+    "version": "OFL 1.1",
+    "license": "OFL-1.1",
+    "publisher": "Erik Kennedy"
+  },
+  {
+    "name": "Lucide icons",
+    "version": "ISC",
+    "license": "ISC",
+    "publisher": "Lucide Contributors"
+  }
+]

@@ -1,0 +1,16 @@
+# The water in view offers a route; the phone's maps app builds it.
+appId: ua.kliuye.app
+---
+- launchApp:
+    clearState: true
+- tapOn: 'Мапа'
+- assertVisible: 'Де будемо рибачити?'
+# Location is optional: the route must be there either way.
+- tapOn: 'Маршрут'
+- assertVisible: 'Як дістатися до.*'
+- assertVisible: 'Авто'
+- assertVisible: 'Пішки'
+- tapOn: 'Авто'
+# The maps app takes over; coming back must leave the screen as it was.
+- pressKey: back
+- assertVisible: 'Мапа водойм'

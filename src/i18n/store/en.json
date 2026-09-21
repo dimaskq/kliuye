@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "To show the bite forecast for waters near you. You can also pick a water body manually.",
+    "CFBundleDisplayName": "Kliuye",
+    "NSPhotoLibraryUsageDescription": "To attach photos and video of your catch to the journal. The files stay on your device."
+  }
+}

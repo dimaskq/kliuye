@@ -1,0 +1,12 @@
+# Denying location must leave every screen working, with a manual choice of place.
+appId: ua.kliuye.app
+---
+- launchApp:
+    clearState: true
+    permissions:
+      location: deny
+- assertVisible: 'Індекс кльову'
+- tapOn: 'Мапа'
+- assertVisible: 'Де будемо рибачити?'
+- tapOn: 'Відкрити'
+- assertVisible: 'Індекс кльову'

@@ -1,0 +1,12 @@
+# The week list expands one day at a time.
+appId: ua.kliuye.app
+---
+- launchApp
+- tapOn: 'Тиждень'
+- assertVisible: 'Прогноз кльову.*'
+- tapOn:
+    text: '.*індекс.*'
+    index: 2
+- assertVisible: 'Вікно.*'
+- assertVisible: 'Вітер.*'
+- assertVisible: 'Тиск.*'

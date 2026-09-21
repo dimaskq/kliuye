@@ -1,0 +1,12 @@
+# The layout scrolls rather than clipping at the largest font scale.
+appId: ua.kliuye.app
+---
+- launchApp
+- assertVisible: 'Індекс кльову'
+- scrollUntilVisible:
+    element:
+      text: 'Порада на зараз'
+    direction: DOWN
+- assertVisible: 'Усі поради дня'
+- tapOn: 'Усі поради дня'
+- assertVisible: 'Поради'

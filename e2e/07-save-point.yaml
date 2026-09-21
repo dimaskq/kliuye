@@ -1,0 +1,19 @@
+# Drop a pin, save it under a name of one's own, and land on its forecast.
+appId: ua.kliuye.app
+---
+- launchApp:
+    clearState: true
+- tapOn: 'Мапа'
+- assertVisible: 'Тицьніть будь-де на мапі.*'
+- tapOn:
+    point: '50%,60%'
+- tapOn: 'Зберегти'
+- assertVisible: 'Зберегти місце'
+- tapOn: 'Назва точки'
+- eraseText
+- inputText: 'Моя яма'
+- tapOn: 'Зберегти й відкрити прогноз'
+- assertVisible: 'Моя яма'
+- assertVisible: 'Індекс кльову'
+- tapOn: 'Мої місця'
+- assertVisible: 'Моя яма'

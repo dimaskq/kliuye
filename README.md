@@ -1,0 +1,496 @@
+# Kliuye / Клює
+
+A fishing bite forecast: a 0–100 index for the day ahead and hour by hour, the
+eight weather factors it is made of, and the advice that follows from them.
+
+The app is **fully usable without an account and without location
+permission** — both a product decision and a store-review requirement.
+
+---
+
+## Getting started
+
+Requires Node 22+.
+
+```bash
+npm ci
+```
+
+### Web preview — the quickest way to look around
+
+```bash
+npm run web        # http://localhost:8081
+```
+
+Runs without a device or the Android SDK. The map in the browser is Leaflet on
+OpenStreetMap tiles, because MapLibre's native module has no web build (see
+`SpotMap.web.tsx`). The other screens are the real ones. Features that need
+native modules — the OS geocoder, scheduled notifications, file storage — are
+no-ops in the browser.
+
+### Android
+
+```bash
+npm run android    # expo run:android — local dev build
+```
+
+Needs Android Studio, JDK 17 and `ANDROID_HOME`. Without a local SDK, build in
+the cloud instead:
+
+```bash
+npx eas build --profile development --platform android
+# install the APK on the phone, then:
+npx expo start --dev-client
+```
+
+> **Expo Go will not work.** The app relies on MapLibre's native module,
+> `blockedPermissions`, a privacy manifest, fonts embedded by
+> the `expo-font` plugin and `expo-notifications` — all produced by config
+> plugins that Expo Go never sees. If a QR code does not open, the usual cause
+> is an outdated Expo Go on the phone: update it from the Play Store rather than
+> downgrading the project's SDK.
+
+### iOS
+
+```bash
+npm run ios        # expo run:ios — needs macOS with Xcode
+```
+
+## Checks
+
+| Command                 | What it does                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| `npm run lint`          | ESLint (flat config), 0 warnings                                                     |
+| `npm run format`        | Prettier in check mode                                                               |
+| `npm run typecheck`     | `tsc --noEmit`, `strict` + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` |
+| `npm test`              | Jest + React Native Testing Library + MSW                                            |
+| `npm run test:coverage` | the same, with coverage thresholds                                                   |
+| `npm run i18n:check`    | identical keys in every language bundle + no UI-text literals in `.tsx`              |
+| `npm run licenses`      | regenerate the licences screen                                                       |
+| `maestro test e2e/`     | end-to-end flows (needs a running emulator or device)                                |
+
+CI runs all of this on every PR, plus a web bundle smoke build.
+
+## Architecture
+
+```
+app/                      expo-router: 6 tabs + settings / about / licenses / species / catch
+src/domain/               pure logic, zero dependencies on React or Expo
+  bite-index/             8 factors → weighted index, verdict, bite window
+  alerts/                 which days deserve a bite alert, and when
+  tips/ moon/ units/ geo/ spots/ water-temperature/ diary/
+src/services/             http → validation → weather (Open-Meteo) → storage → query; notifications, media
+src/features/             today · week · map · diary · tips · profile · settings · about
+src/ui/                   design-system tokens + components
+src/store/                Zustand: preferences · selection · angler · points · diary · location
+src/config/               public links (privacy policy, support e-mail)
+src/i18n/                 uk / en / bg bundles + store strings
+docs/                     privacy policy, served by GitHub Pages
+store/                    Google Play listing, release walkthrough, release-day checklist
+plugins/                  Expo config plugins (release signing with the upload key)
+```
+
+Rules enforced by the linter rather than by reviewers:
+
+- `src/domain` does not import `react`, `react-native`, `expo`, `@/ui` or `@/services`.
+- A feature does not reach into another feature's internals — shared code moves up into `@/ui`, `@/domain` or `@/hooks`, or is exported from the feature's `index.ts`.
+- A bare `<Text>` from `react-native` is banned: typography goes through `@/ui`.
+- Hex colour literals are banned outside `src/ui/tokens`.
+- Functions are at most 30 lines (`.ts`) / 50 lines (`.tsx`, where a component body is mostly markup).
+
+## Design
+
+The visual language is "a float on the water": blaze orange (the tip of a
+float), deep-lake teal and a chartreuse lure accent on a cool, light ground.
+Every colour lives in `src/ui/tokens/colors.ts`; high scores are drawn in blaze
+orange, middling ones in teal. Light text never sits on the orange — `onAccent`
+is the dark ink.
+
+The app icon and the Google Play artwork are generated by
+`python3 scripts/generate-icons.py` into `assets/` and `assets/store/`.
+
+> **Known issue:** Figtree, the body font, has no Cyrillic glyphs, so Ukrainian
+> and Bulgarian body text falls back to the system font. Rubik (headings) does
+> cover Cyrillic.
+
+## The bite index
+
+`src/domain/bite-index` is pure and deterministic, with no `Date.now()` inside:
+time and weather come in as arguments.
+
+The eight factors and their weights (they sum to 1, checked by a test):
+
+| Factor             | Weight | Idea                                                                          |
+| ------------------ | ------ | ----------------------------------------------------------------------------- |
+| `pressure`         | 0.22   | best is a slow fall of ≈ −3 hPa/day; a sharp jump either way kills the bite   |
+| `waterTemperature` | 0.18   | a plateau inside the species' optimal range, falling off outside it           |
+| `wind`             | 0.16   | peaks around 4 m/s; flat calm and 8+ m/s are worse; an onshore wind adds more |
+| `moon`             | 0.10   | new and full moon beat the quarters                                           |
+| `timeOfDay`        | 0.10   | peaks an hour after sunrise and an hour before sunset                         |
+| `cloudCover`       | 0.08   | broken cloud beats a clear sky                                                |
+| `precipitation`    | 0.08   | drizzle beats both dry weather and a downpour                                 |
+| `airWaterDelta`    | 0.08   | air 2–3° warmer than the water is best                                        |
+
+Adding a factor = a new file in `factors/` + a line in `weights.ts`. **The UI
+does not change.** Species profiles are data in `species-profiles.ts`; there is
+no `if (species === …)` anywhere else.
+
+`src/domain` has 100% branch coverage, including property-based tests
+(fast-check).
+
+## Data
+
+- **Weather:** the [Open-Meteo](https://open-meteo.com/) Forecast API — no key,
+  free for non-commercial and small-scale use (≤ 10,000 requests/day; see their
+  terms for a commercial plan). Attribution is on the About screen.
+- **Water temperature:** the Marine API where it has data; for inland waters, an
+  **estimate** from the 5-day mean air temperature plus a seasonal correction.
+  The UI always marks an estimate with "≈".
+- **Moon phase:** computed on the device (Meeus, ch. 49), no network.
+
+Networking: a single client, `src/services/http.ts` — 10 s timeout, one retry
+with back-off, `AbortSignal`, typed errors. Every response is validated at the app boundary by
+`src/services/validation.ts` — a few typed checks instead of a schema library,
+whose locales alone would outweigh the app. Cache: 30 minutes "fresh" in memory, 7 days on disk
+(AsyncStorage); offline shows the cache with a "data from HH:MM" badge. Details
+in [Offline](#offline).
+
+Coordinates are rounded to 2 decimals **before** they are sent, and are never
+logged.
+
+## Today
+
+The header names the place and carries three buttons: **refresh**, **my
+places** (the same saved/recent list as on the map) and **settings**. A reload
+shows a floating "Updating the forecast… → Forecast updated" pill that glides in
+and out without pushing the page; it is held for at least 0.7 s so an instant
+answer is still seen ([`useRefreshPhase.ts`](src/features/today/useRefreshPhase.ts)).
+
+## Map
+
+The map fills the screen under a header — "Where are we fishing?", a button that
+zooms to the pin and a button for **My places** — and a search row with a
+**Find** button that moves the pin to the top match at once.
+
+- **Tap the map** to drop a pin exactly there; tap again to move it (the web
+  preview also lets you drag it).
+- **Search for a town** — [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api),
+  the same provider as the forecast: no key, no billing, localised names. Typing
+  is debounced by 350 ms and cached for 10 minutes.
+- Along the bottom: **Open** (the forecast for the selected place, on Today),
+  **Route** and — for a dropped pin — **Save**, which opens a dialog with the
+  suggested name, editable, and a tick that saves the place and opens its
+  forecast.
+
+The forecast cache is keyed by "place + coordinates", not by id alone: a dropped
+pin keeps the id `custom` while it moves, so an id-only key would serve the
+previous place's data.
+
+The selection is kept as `customPoint` in `useSelection` and survives a restart.
+Neither a search result nor a tap tells us where the shore is, so wind direction
+stays neutral in the model — more honest than inventing a `shoreBearingDeg`.
+
+### Saved and recent places
+
+Recent (the last 10) and saved places live in `usePoints` (persisted, on the
+device only). "The same place" is decided by `pointKey` — coordinates rounded to
+two decimals, exactly as the forecast cache and the API see them — so tapping
+the same spot again does not create duplicates, it only refreshes the name.
+
+Rows in the list **do not show an index**: that would cost up to ten network
+requests per opening. Pick a place and Today shows its full forecast.
+
+### How a point gets its name
+
+The name comes from `reverseGeocode` through the **operating system's
+geocoder** (`expo-location`): free, no third-party vendor and nothing extra in
+the privacy forms. Names are cached on disk (the last 120), so saved places keep
+their names offline. The geocoder has no web implementation, so **in the
+browser a point is called "Point on the map"**.
+
+### Getting to the water
+
+**Route** opens a dialog — "By car" or "On foot" — that hands over to the
+phone's own maps app: Apple Maps on iOS, Google Maps on Android and in the
+browser ([`src/services/directions.ts`](src/services/directions.ts)).
+
+We **do not pass a starting point**: the navigator has live GPS, we have at best
+an approximate position, so the route works even if location permission was
+never granted. The destination is sent at full precision, not rounded like for
+the weather API — two decimals would be a kilometre off.
+
+No route is offered to "My location" — nobody needs directions to where they
+stand. When the device position and the selected water are less than 80 km
+apart, the camera fits both into view.
+
+### Maps by platform
+
+| Platform        | Provider                                                        | What it needs                                    |
+| --------------- | --------------------------------------------------------------- | ------------------------------------------------ |
+| Android and iOS | MapLibre + [OpenFreeMap](https://openfreemap.org/) vector tiles | nothing — no key, no account, no billing         |
+| Web             | Leaflet + OpenStreetMap tiles                                   | nothing; the OSM attribution is drawn on the map |
+| Any, offline    | saved OpenStreetMap tiles, via MapLibre                         | nothing; see [Offline](#offline)                 |
+
+The map lives entirely in `SpotMap` ([native](src/features/map/components/SpotMap.tsx),
+[web](src/features/map/components/SpotMap.web.tsx)): everything else — pins,
+saving, routes, search — talks to it through the same props, so the tile
+provider can change without touching the rest of the app.
+
+The web preview is for development: OSM tiles are free, but their
+[tile usage policy](https://operations.osmfoundation.org/policies/tiles/) is not
+meant for production traffic. The app ships for iOS and Android, so this does
+not arise; publishing on the web would need a separate tile provider.
+
+## Bite alerts
+
+With the switch on, the app schedules a **local** notification an hour before
+the best window on every day of the forecast whose verdict is "Good bite" or
+"Feeding frenzy" ([`src/domain/alerts`](src/domain/alerts/index.ts)). Alerts are
+re-planned whenever the forecast, the place or the language changes, and
+cancelled when the switch goes off ([`useBiteAlerts.ts`](src/hooks/useBiteAlerts.ts)).
+No push service or token is involved.
+
+The permission is asked only when the switch is turned on. Alerts are planned
+while the app is in use; a week without opening it adds no new days (background
+refresh would fix that and is not in v1).
+
+## Journal
+
+A tab next to Map. An entry is a date, a fish, a weight, a place, a note and up
+to six photos or videos; everything stays on the device.
+
+The form pre-fills what is already on screen: the place from Today and the
+selected species. "All species" is the forecast baseline, not a fish, so it
+never lands in an entry: `realSpecies` swaps it for the first freshwater
+species.
+
+The date is a stepper "‹ Today ›" rather than a modal calendar: it is the same on
+iOS, Android and the web, reads well with a screen reader and cannot be set to
+tomorrow (`canShift`). The weight accepts both "2,4" and "2.4" — the comma is
+the decimal separator on Ukrainian and Bulgarian keyboards.
+
+### Photos and video
+
+Media come from the system picker (`expo-image-picker`). This is deliberate:
+since SDK 51 the picker needs **no** permission — the OS hands back only the
+chosen files — so the app adds neither `READ_MEDIA_IMAGES` nor `CAMERA`, and
+`blockedPermissions` keeps them out. There is no in-app camera on purpose: it
+would cost a permission for something the phone's camera already does.
+
+The file is then copied out of the system cache (which the OS may clear at any
+time) into the app's own `${documents}/catches` folder. For video,
+`expo-video-thumbnails` grabs a frame one second in — the first frame is often
+black; if the codec refuses, the clip is still saved and marked with a play
+icon.
+
+Files are deliberately **not** deleted while editing: if a photo is removed from
+the form and the edit is abandoned, the saved entry still needs the file.
+Instead, `pruneOrphans` removes anything no entry refers to when the journal
+opens.
+
+In the browser there is no copying (`expo-file-system` does not run there) — the
+preview keeps a `blob:` URL that lives until the page reloads. This affects only
+the web preview, not the app.
+
+## Profile
+
+Tapping the angler at the top of the "Me" tab opens **My profile**: a photo
+(system picker with a square crop) and a name. Changes apply only on Save; a
+photo picked and then abandoned is deleted. The photo is kept in
+`${documents}/profile`, apart from the journal folder whose orphans get pruned
+([`useProfileEditor.ts`](src/features/profile/useProfileEditor.ts)).
+
+The counters are computed from the journal, not kept separately:
+
+| Stat       | Source                                          |
+| ---------- | ----------------------------------------------- |
+| Trips      | distinct calendar days in the entries           |
+| Fish       | the number of entries                           |
+| Record, kg | the heaviest weighed fish                       |
+| Since      | the oldest entry, otherwise the year of install |
+
+So fixing an entry fixes the stats — there is no separate counter that could
+drift from the journal.
+
+Settings hold two switches: **Offline map** and **Bite alerts**.
+
+## Species
+
+14 species in two groups — freshwater and sea — plus "All species" as the mixed
+baseline. The "All species" chip on Today opens a screen with the full
+catalogue; the chips next to it stay for quick switching.
+
+Grouping is the `habitat` field in `SPECIES_PROFILES`, so a new species lands in
+its section by itself: no screen changes. Each row shows the index for that fish
+at the selected water, its optimal water range, and an "out of season" mark when
+the month is wrong.
+
+Seasonality is not cosmetic: in August flounder and turbot score 55–58 against
+81–82 for summer species — through `seasonMonths` and `optimalWaterC` in the
+profile.
+
+## Hourly chart
+
+A smooth curve instead of 24 bars — the way weather apps look, so it reads
+without explanation. Three ways to reach an hour:
+
+- **drag a finger** along the curve — a quick scan of the day;
+- **‹ › arrows** — exactly one hour back or forward;
+- **a screen reader** — the block is `adjustable` (a `slider` in ARIA terms), so
+  swiping up/down steps through the hours.
+
+The step is counted by the store (`useSelection.stepHour`), not the component:
+otherwise several quick taps on ‹ › would merge into one, each counted from the
+same prop.
+
+Two things that are easy to get wrong live in pure, tested functions
+(`curvePath.ts`):
+
+- **vertical scale** — the axis follows the day's own range, not 0–100: a 73–84
+  day on an absolute axis would be a flat line at the top. The minimum window is
+  25 points, so a genuinely flat day is not blown up into drama;
+- **smoothing** — Catmull-Rom through all 24 points, drawn as cubic Béziers.
+
+The colour ramp is still there: the fill under the curve is a 24-stop gradient,
+one `scoreFill` per hour.
+
+## Location
+
+The forecast is for **your point**, not a bundled list: Open-Meteo covers the
+whole globe, so `currentLocationSpot(origin)` is a water like any in the
+catalogue. The order of choice in `useActiveSpot`:
+
+1. a place chosen by hand;
+2. the device position, if permission was given;
+3. the default catalogue water — so the app works without permission.
+
+Permission is asked **only on a tap**, and only after the app's own explanation
+screen (`PermissionBanner` on Today), never at launch. A refusal is a normal
+state: every screen keeps working with a manual choice.
+
+The bundled catalogue covers the Kyiv reservoir; its waters are not offered
+further than `NEARBY_RADIUS_KM` (150 km) away. The place name in the header comes
+from `reverseGeocodeAsync`; when there is none, the header shows the
+coordinates — they are always true. A time-zone name is never used as a place
+name: `Europe/Sofia` does not mean "you are in Sofia".
+
+## Water temperature
+
+Two sources, and the app always says which one it used:
+
+1. **Measured** — the Open-Meteo Marine API (`sea_surface_temperature`). It
+   covers seas and oceans: for Varna it returns 24/24 values.
+2. **Estimated** — for inland waters the marine API returns only `null` (0/24
+   for the Kyiv reservoir), so we compute it: the 5-day mean daily air
+   temperature plus a seasonal correction (`src/domain/water-temperature`), never
+   below 0 °C.
+
+An estimate is **never passed off as a measurement**: the factor card puts "≈"
+before the value, and the model lowers that factor's `confidence` to 0.75 (0.45
+when there is no data at all). No promise of precision we do not have.
+
+This is a deliberate simplification: a real pond's temperature depends on
+depth, flow and wind mixing. A five-day mean with a correction is a reasonable
+approximation, but it is an approximation.
+
+## Offline
+
+The app works without a network: at the water there often is none, and that is
+a normal mode, not an error.
+
+**What switches it.** [`expo-network`](https://docs.expo.dev/versions/latest/sdk/network/)
+feeds the connection state into TanStack Query's `onlineManager`
+([`src/services/network`](src/services/network/index.ts)). Everything else
+follows: requests pause instead of failing and retry by themselves when the
+signal returns; screens read the same flag through `useIsOnline()`. The device
+counts as offline only when it says so outright — "don't know yet" is treated
+as online: a false "online" costs one failed request, a false "offline" would
+stop updates entirely.
+
+**What is stored**
+
+| Data                               | Where                                          | How long                          |
+| ---------------------------------- | ---------------------------------------------- | --------------------------------- |
+| Forecast and marine data           | AsyncStorage through the Query persister       | 7 days                            |
+| Settlement search                  | the same                                       | 7 days                            |
+| Map tiles                          | app documents / Cache Storage in the browser   | up to 48 MB, oldest evicted first |
+| Point names (reverse geocode)      | AsyncStorage                                   | the last 120 points               |
+| Journal, places, profile, settings | AsyncStorage (zustand persist) + app documents | until the user deletes them       |
+
+Only finished, successful responses are written to disk, and the persister key
+is tied to `STORAGE_VERSION`: a schema change does not resurrect a format we no
+longer read.
+
+**The offline map.** While there is a connection, the app prefetches
+OpenStreetMap tiles around the selected point and the saved places — zoom 8–13,
+a radius of ~12 km, at most 300 tiles per area, with a 2 s pause so dragging a
+pin does not pull half the world ([`useTilePrefetch`](src/hooks/useOfflineMaps.ts)).
+Tiles live in `documents/map-tiles/{z}/{x}/{y}`. Offline, the map swaps its
+online OpenFreeMap style for a raster style that reads these files through a
+`file://` template ([`mapStyle.ts`](src/features/map/components/mapStyle.ts));
+beyond the deepest saved zoom MapLibre scales the last tile up, and the OSM
+attribution is shown. In the browser
+a Leaflet layer does the same over Cache Storage.
+
+The cache size is shown in Settings, with a Clear button; the "Offline map"
+switch turns prefetching off.
+
+**What does not work offline.** Settlement search (it is a request to
+Open-Meteo) — it explains itself instead of showing an empty list. A new point
+the geocoder has never seen is called "Point on the map".
+
+**Limits.** A forecast days old is no longer a forecast; the "data from HH:MM"
+badge says so plainly instead of pretending to be fresh. Tile prefetching
+respects the OSM [tile usage policy](https://operations.osmfoundation.org/policies/tiles/):
+a few areas per session, at most four parallel requests, its own `User-Agent`.
+
+## Languages
+
+Ukrainian, English, Bulgarian. The language follows the device when we know it,
+otherwise Ukrainian.
+
+Adding a language takes three steps and no screen edits:
+
+1. `src/i18n/<code>.json` with the same keys;
+2. the code in `SUPPORTED_LANGUAGES` and the date-fns locale in `useDateFormat`;
+3. a `profile.language<Code>` key in every bundle — `useLanguageLabels` picks the
+   language name by code.
+
+`npm run i18n:check` compares **every** bundle against Ukrainian as the
+reference, so a missing key is caught in CI. Each language pluralises its own
+way — Ukrainian has one/few/many, English and Bulgarian one/other; keys are
+compared without plural suffixes, so that is not a mismatch.
+
+Bulgarian fish names are the Black Sea ones, not calques: калкан, писия, попче,
+сафрид, лефер, кефал, бяла риба.
+
+## Accessibility
+
+- Every interactive element has a role, a name and a state; switches use
+  `accessibilityRole="switch"`.
+- The index is read as "Bite index 78 out of 100, good bite", not "78".
+- The hourly chart is an adjustable control announcing the hour and its value.
+- The minimum touch target is 48 dp / 44 pt, via `hitSlop` where needed.
+- No state is conveyed by colour alone: a number and a word always sit next to it.
+- `Reduce Motion` turns off the ring, the bars, the day expansion and the refresh
+  pill animations: some read the setting through `useReduceMotion`, the layout
+  animations hand the decision to Reanimated via `ReduceMotion.System`.
+- Content scrolls rather than clips — the layout holds at `fontScale` 200%.
+
+A manual VoiceOver / TalkBack pass is a step in [RELEASE.md](RELEASE.md), done
+before every submission.
+
+## Privacy
+
+No accounts, analytics, ads or tracking. The privacy policy is in
+[`docs/privacy/index.html`](docs/privacy/index.html) (English, Ukrainian,
+Bulgarian), served at `https://dimaskq.github.io/kliuye/privacy/`; the app links
+to it from About ([`src/config/links.ts`](src/config/links.ts)). Anything that
+changes what the app does with data must update the policy and the store privacy
+forms first.
+
+## Licences
+
+The Rubik and Figtree fonts (OFL 1.1) are vendored in `assets/fonts` with their
+licence texts. Icons are Lucide (ISC). The licences screen is generated by
+`npm run licenses`.

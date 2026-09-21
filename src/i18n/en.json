@@ -1,0 +1,489 @@
+{
+  "tabs": {
+    "today": "Today",
+    "week": "Week",
+    "map": "Map",
+    "diary": "Journal",
+    "tips": "Tips",
+    "profile": "Me"
+  },
+  "common": {
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "close": "Close",
+    "approx": "≈",
+    "loading": "Loading",
+    "staleData": "Data from {{time}}",
+    "offline": "No connection — showing saved data"
+  },
+  "error": {
+    "network": "No network connection.",
+    "timeout": "The server did not answer in time.",
+    "aborted": "The request was cancelled.",
+    "http": "The weather service is unavailable right now.",
+    "validation": "The forecast came back in an unexpected shape.",
+    "unknown": "Something went wrong.",
+    "title": "Could not refresh the forecast",
+    "boundaryTitle": "Something broke",
+    "boundaryBody": "The app hit an unexpected error. Please restart it.",
+    "restart": "Restart"
+  },
+  "verdict": {
+    "feeding": {
+      "word": "Feeding frenzy",
+      "note": "Days like this happen a few times a season. Drop everything and go."
+    },
+    "good": {
+      "word": "Good bite",
+      "note": "Fish are active at first and last light. Worth the trip."
+    },
+    "moderate": {
+      "word": "Moderate",
+      "note": "They will bite selectively — stay deep and retrieve slowly."
+    },
+    "weak": {
+      "word": "Weak",
+      "note": "Fish are sluggish. Count on one or two bites per session."
+    },
+    "dead": {
+      "word": "Dead",
+      "note": "The weather has killed the bite. Better to sort tackle at home."
+    }
+  },
+  "species": {
+    "all": "All species",
+    "pike": "Pike",
+    "perch": "Perch",
+    "zander": "Zander",
+    "bream": "Bream",
+    "roach": "Roach",
+    "carp": "Carp",
+    "catfish": "Catfish",
+    "crucian": "Crucian carp",
+    "flounder": "Flounder",
+    "turbot": "Turbot",
+    "mullet": "Mullet",
+    "horseMackerel": "Horse mackerel",
+    "bluefish": "Bluefish",
+    "goby": "Goby"
+  },
+  "compass": {
+    "n": "N",
+    "ne": "NE",
+    "e": "E",
+    "se": "SE",
+    "s": "S",
+    "sw": "SW",
+    "w": "W",
+    "nw": "NW"
+  },
+  "units": {
+    "windMetric": "{{value}} m/s",
+    "windImperial": "{{value}} mph",
+    "temperature": "{{value}}°",
+    "percent": "{{value}}%"
+  },
+  "today": {
+    "sectionSpecies": "Species",
+    "sectionSpeciesAside": "SPECIES",
+    "sectionHourly": "By the hour",
+    "sectionFactors": "What it is made of",
+    "sectionFactorsAside": "FACTORS",
+    "indexLabel": "Bite index",
+    "indexAccessible": "Bite index {{value}} out of 100, {{verdict}}",
+    "bestWindow": "Best window {{start}}–{{end}}",
+    "hourAccessible": "{{hour}}, index {{value}}",
+    "tipKicker": "Advice right now",
+    "allTips": "All of today's tips",
+    "speciesAccessible": "{{name}}, index {{value}}",
+    "changePlace": "Change the place",
+    "hourlyHint": "Slide along the curve, or step hour by hour with the arrows.",
+    "previousHour": "Previous hour",
+    "nextHour": "Next hour",
+    "hourValue": "index {{value}}",
+    "myPlaces": "My places",
+    "refresh": "Refresh the forecast",
+    "refreshing": "Updating the forecast…",
+    "refreshed": "Forecast updated"
+  },
+  "factorCard": {
+    "wind": "Wind",
+    "airWaterDelta": "Air",
+    "waterTemperature": "Water",
+    "pressure": "Pressure",
+    "moon": "Moon",
+    "precipitation": "Rain",
+    "cloudCover": "Cloud",
+    "timeOfDay": "Sun",
+    "accessible": "{{label}}: {{value}}. {{note}}"
+  },
+  "factor": {
+    "pressure": {
+      "falling": "Falling {{delta}} hPa in 24 h",
+      "rising": "Rising {{delta}} hPa in 24 h",
+      "steady": "Holding steady"
+    },
+    "wind": {
+      "calm": "Calm · mirror flat",
+      "ripple": "{{direction}} · rippling",
+      "strong": "{{direction}} · strong"
+    },
+    "water": {
+      "warming": "{{trend}}° in 24 h",
+      "cooling": "{{trend}}° in 24 h",
+      "steady": "Unchanged in 24 h",
+      "unknown": "No reading"
+    },
+    "moon": {
+      "new": "New moon",
+      "waxingCrescent": "Waxing crescent",
+      "firstQuarter": "First quarter",
+      "waxingGibbous": "Waxing gibbous",
+      "full": "Full moon",
+      "waningGibbous": "Waning gibbous",
+      "lastQuarter": "Last quarter",
+      "waningCrescent": "Waning crescent",
+      "day": "Day {{day}}"
+    },
+    "cloud": {
+      "clear": "Clear — a minus",
+      "broken": "Broken — a plus",
+      "overcast": "Overcast — a plus"
+    },
+    "precipitation": {
+      "dry": "Dry",
+      "drizzle": "Drizzle, {{probability}}%",
+      "heavy": "Downpour, {{probability}}%"
+    },
+    "airWater": {
+      "warmer": "Low {{night}}° overnight",
+      "even": "Low {{night}}° overnight",
+      "colder": "Cold snap, low {{night}}°",
+      "unknown": "Low {{night}}° overnight"
+    },
+    "time": {
+      "dawn": "Morning window",
+      "dusk": "Evening window",
+      "day": "Daytime",
+      "night": "Night",
+      "sunset": "Sunset {{time}}"
+    }
+  },
+  "week": {
+    "title": "Week",
+    "subtitle": "Bite forecast · {{species}}",
+    "hint": "Tap a day to see its bite window, wind, pressure and moon phase.",
+    "dayAccessible": "{{day}} {{date}}, index {{value}}, {{summary}}",
+    "window": "Window {{start}}–{{end}}",
+    "wind": "Wind {{value}}",
+    "pressure": "Pressure {{value}}",
+    "summary": "{{cloud}}, {{wind}}"
+  },
+  "map": {
+    "permissionTitle": "Show waters near you",
+    "permissionBody": "To show the bite forecast for waters near you. You can also pick a water body manually.",
+    "permissionAllow": "Allow",
+    "permissionManual": "Pick a water manually",
+    "placeholder": "Waters map",
+    "searchPlaceholder": "Search a town or village",
+    "searchLabel": "Search for a settlement",
+    "searchEmpty": "Nothing found. Try another name.",
+    "pickHint": "Tap anywhere on the map to drop a pin.",
+    "nameLabel": "Name of the point",
+    "namePlaceholder": "What to call this place",
+    "tabRecent": "Recent",
+    "tabFavourites": "Saved",
+    "favourite": "Save this point",
+    "unfavourite": "Remove from saved",
+    "recentEmptyTitle": "No recent points yet",
+    "recentEmptyBody": "Tap the map or search for a settlement — the last 10 points stay here.",
+    "favouritesEmptyTitle": "Nothing saved",
+    "favouritesEmptyBody": "Drop a pin on the map and tap Save — the place will stay here.",
+    "searchOffline": "Settlement search needs a connection.",
+    "routeWalk": "Walk there",
+    "routeFailed": "Could not open a maps app.",
+    "youAreHere": "You are here",
+    "routeCarTo": "Driving route to “{{name}}”",
+    "routeWalkTo": "Walking route to “{{name}}”",
+    "searchButton": "Find",
+    "openForecast": "Open",
+    "save": "Save",
+    "saveTitle": "Save this place",
+    "saveBody": "The name comes from the nearest settlement. Change it if you like.",
+    "saveConfirm": "Save and open the forecast",
+    "headerTitle": "Where are we fishing?",
+    "focusPin": "Zoom to the pin",
+    "placesTitle": "My places",
+    "route": "Route",
+    "routeTitle": "How to get to “{{name}}”?",
+    "routeByCar": "By car"
+  },
+  "tips": {
+    "title": "Tips",
+    "subtitle": "Drawn from what the weather is doing right now",
+    "category": {
+      "spinning": "Spinning",
+      "placement": "Where to stand",
+      "retrieve": "Retrieve",
+      "lures": "Lures",
+      "timing": "Timing",
+      "weather": "Weather",
+      "tactics": "Tactics",
+      "gear": "Tackle",
+      "data": "Data"
+    },
+    "species": {
+      "all": "All species",
+      "pikePerch": "Pike, perch",
+      "predator": "Predators",
+      "shy": "Shy fish",
+      "shallows": "Shallows",
+      "deep": "Deep water",
+      "morning": "Morning",
+      "evening": "Evening",
+      "midday": "Midday",
+      "night": "Night"
+    },
+    "pressureFalling": {
+      "title": "Fish the edge of the drop-off",
+      "body": "On falling pressure predators leave the holes and sit at two to three metres. Work the lure along the ledge, not across the bottom of the pit."
+    },
+    "pressureRising": {
+      "title": "Go deeper and slow down",
+      "body": "Rising pressure pins fish to the bottom. Work the holes, use long pauses and a smaller lure."
+    },
+    "pressureSteady": {
+      "title": "Steady barometer, steady tactics",
+      "body": "With the pressure flat fish hold their usual spots. Start with proven marks and resist swapping lures too early."
+    },
+    "windRipple": {
+      "title": "Stand so the wind hits the bank",
+      "body": "The chop pushes food to the leeward bank — baitfish follow, and predators follow them. Mirror-flat water is worse right now."
+    },
+    "windStrong": {
+      "title": "Get behind a headland",
+      "body": "In strong wind look for sheltered bays and leeward points. A heavier lure keeps contact with the bottom."
+    },
+    "windCalm": {
+      "title": "Finer and quieter",
+      "body": "In dead calm fish see everything. Thinner fluorocarbon, a smaller lure, a longer cast — and no banging around the boat."
+    },
+    "waterWarming": {
+      "title": "Speed the retrieve up",
+      "body": "Fish are no longer sluggish: pause two or three seconds instead of five, shorten the jerk. Warm water suits a 3″ twister and a minnow."
+    },
+    "waterCooling": {
+      "title": "Slow everything down",
+      "body": "Cooling water slows the metabolism. Long pauses, a smaller lure, and fish the deepest stretches."
+    },
+    "waterSteady": {
+      "title": "Keep the usual rhythm",
+      "body": "Water temperature is stable, so fish are not relocating. Revisit the same marks at different hours."
+    },
+    "waterUnknown": {
+      "title": "Read the air instead",
+      "body": "There is no water reading — estimate it from the recent average air temperature and do not trust the forecast too precisely."
+    },
+    "cloudBroken": {
+      "title": "Go bright and noisy",
+      "body": "In murky light fish key on contrast and vibration. Acid colours and wide-action lures beat natural ones."
+    },
+    "cloudOvercast": {
+      "title": "Predators have spread over the shallows",
+      "body": "Under full cloud fish are not afraid of open water. Cover the shallows and the mouth of the bay."
+    },
+    "cloudClear": {
+      "title": "Look for shade and depth",
+      "body": "In bright sun fish sit under snags, in bank shade and deep. Fish early, late, or in the shadows."
+    },
+    "moonNew": {
+      "title": "Do not miss the morning window",
+      "body": "On a new moon the strongest phase is the first two hours after sunrise. Be on the water early, not at eight."
+    },
+    "moonFull": {
+      "title": "A full moon shifts the bite to the night",
+      "body": "On a full moon fish feed at night and are sluggish in the morning. Plan a late evening or a very early start."
+    },
+    "precipitationDrizzle": {
+      "title": "Drizzle is no reason to go home",
+      "body": "Light rain knocks down surface glare and adds oxygen. The bite dies before a thunderstorm, not under drizzle."
+    },
+    "precipitationHeavy": {
+      "title": "Sit the downpour out",
+      "body": "Heavy rain clouds the water and kills the bite. Wait for it to ease and fish the first hours after."
+    },
+    "precipitationDry": {
+      "title": "In dry weather, work the clock",
+      "body": "With no rain the bite holds at dawn and dusk. In the middle of the day pick shade and depth."
+    },
+    "timeDawn": {
+      "title": "The morning window is open",
+      "body": "The most active hour of the day has already started. Do not spend it rigging up."
+    },
+    "timeDusk": {
+      "title": "The evening session has begun",
+      "body": "The last two hours of light are the day's second window. Take your best mark right now."
+    },
+    "timeDay": {
+      "title": "Fish spots, not water",
+      "body": "Between the windows fish hold still. Work cover — snags, ledges, bank shade — instead of searching wide."
+    },
+    "airWaterWarmer": {
+      "title": "The shallows have warmed — fish are there",
+      "body": "Air warmer than water means shallow ground heats fastest. Start there."
+    },
+    "airWaterColder": {
+      "title": "A cold snap drives fish deep",
+      "body": "Air colder than water cools the shallows first. Work the holes and the drop-offs."
+    }
+  },
+  "diary": {
+    "title": "Journal",
+    "subtitle": "Log your catches and the stats on your profile start counting your own fish.",
+    "add": "Log a catch",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "The first entry takes half a minute: date, fish, weight and place. A note about tackle or bait will pay off next season.",
+    "summary": "{{fish}} · {{trips}} · record {{record}}",
+    "kg": "{{value}} kg",
+    "newTitle": "New catch",
+    "editTitle": "Entry",
+    "dateLabel": "When",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "speciesLabel": "Fish",
+    "weightLabel": "Weight",
+    "weightAside": "kg",
+    "weightPlaceholder": "E.g. 2.4",
+    "placeLabel": "Place",
+    "placePlaceholder": "Name of the water",
+    "noteLabel": "Note",
+    "notePlaceholder": "Tackle, bait, weather…",
+    "save": "Save",
+    "delete": "Delete",
+    "rowAccessible": "{{species}}, {{weight}}, {{day}}, {{place}}",
+    "mediaLabel": "Photos and video",
+    "mediaCount": "{{used}} / {{max}}",
+    "mediaAdd": "Add",
+    "mediaBusy": "One moment…",
+    "mediaFull": "Enough",
+    "mediaFailed": "Could not add that file. Please try again.",
+    "mediaRemove": "Remove file {{index}}",
+    "photos_one": "{{count}} photo",
+    "photos_other": "{{count}} photos",
+    "rowWithMedia": "{{species}}, {{weight}}, {{day}}, {{place}}, {{media}}"
+  },
+  "profile": {
+    "statsSummary": "{{trips}} · {{fish}} · since {{year}}",
+    "trips_one": "{{count}} trip",
+    "trips_other": "{{count}} trips",
+    "fish_one": "{{count}} fish",
+    "fish_other": "{{count}} fish",
+    "averageIndex": "Avg. index",
+    "recordKg": "Record kg",
+    "spots": "Waters",
+    "language": "Мова / Language",
+    "languageUk": "Українська",
+    "languageEn": "English",
+    "proTitle": "Kliuye Pro",
+    "proBody": "A 14-day index, data for your exact water and no ads at all.",
+    "proSoon": "Coming soon",
+    "about": "About",
+    "aboutHint": "Data sources, licences, privacy",
+    "defaultName": "Angler",
+    "defaultInitials": "K",
+    "languageBg": "Български",
+    "editProfile": "Edit profile",
+    "editTitle": "My profile",
+    "nameLabel": "Name",
+    "namePlaceholder": "What should we call you",
+    "photoPick": "Choose a photo",
+    "photoChange": "Change photo",
+    "photoRemove": "Remove photo",
+    "photoFailed": "Could not open the photo. Try again.",
+    "save": "Save"
+  },
+  "settings": {
+    "notifications": "Feeding-frenzy alerts",
+    "notificationsHint": "An hour before the window on good-bite days",
+    "offlineMaps": "Offline map",
+    "offlineMapsHint": "Keep the map around your spots",
+    "offlineCacheTitle": "Saved map",
+    "offlineCacheSize": "On the device: {{size}} MB",
+    "offlineCacheClear": "Clear"
+  },
+  "about": {
+    "title": "About",
+    "disclaimerTitle": "A forecast, not a guarantee",
+    "disclaimer": "The bite index is an estimate based on open weather data. It is not a guarantee of a catch.",
+    "sourcesTitle": "Data sources",
+    "sources": "Weather data and settlement search: Open-Meteo. Maps: OpenFreeMap, built on OpenStreetMap; OpenStreetMap tiles in the browser and offline. Map tiles for your spots are stored on the device. The moon phase is computed on the device using Meeus algorithm.",
+    "openMeteo": "Open open-meteo.com",
+    "rulesTitle": "Fishing rules",
+    "rules": "Rules, closed seasons and licence requirements vary by region. Check local regulations before you go.",
+    "privacyTitle": "Privacy",
+    "privacy": "No accounts, analytics or ads. Your journal, photos, profile and saved places stay on this phone. To fetch the forecast, coordinates rounded to about 1 km are sent to Open-Meteo; the map comes from OpenFreeMap and OpenStreetMap, place names from your phone's geocoder. See the privacy policy for details.",
+    "privacyPolicy": "Privacy policy",
+    "licensesTitle": "Licences",
+    "licenses": "Open-source licences",
+    "version": "Version {{version}}",
+    "contact": "Write to the developer"
+  },
+  "spots": {
+    "s1": {
+      "name": "Bay behind the dam",
+      "meta": "2–4 m deep · pike, perch"
+    },
+    "s2": {
+      "name": "Lyutizh sandbars",
+      "meta": "1–2 m shallows · roach, bream"
+    },
+    "s3": {
+      "name": "Old riverbed",
+      "meta": "7 m hole · zander"
+    },
+    "s4": {
+      "name": "Demydiv pond",
+      "meta": "paid water · carp"
+    },
+    "here": {
+      "name": "Your location",
+      "meta": "forecast for your coordinates · {{position}}",
+      "region": {
+        "named": "{{place}}",
+        "unnamed": "{{position}}"
+      }
+    },
+    "region": {
+      "vyshhorod": "Vyshhorod"
+    },
+    "custom": {
+      "named": "{{place}}",
+      "unnamed": "Point on the map",
+      "meta": "picked on the map",
+      "region": "picked on the map"
+    }
+  },
+  "speciesPicker": {
+    "title": "Species",
+    "subtitle": "Pick what you are going for — the index is recomputed for it",
+    "open": "All species",
+    "group": {
+      "any": "No particular species",
+      "freshwater": "Rivers and lakes",
+      "sea": "Sea"
+    },
+    "optimum": "water {{from}}–{{to}}°",
+    "outOfSeason": "out of season",
+    "accessible": "{{name}}, index {{value}}, {{meta}}"
+  },
+  "notifications": {
+    "channel": "Bite alerts",
+    "title": {
+      "feeding": "Feeding frenzy at “{{place}}”! Drop everything",
+      "good": "Good bite at “{{place}}”"
+    },
+    "body": "Bite window {{start}}–{{end}}, index {{value}}. Grab your gear — it starts in an hour."
+  }
+}

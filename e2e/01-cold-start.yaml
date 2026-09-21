@@ -1,0 +1,12 @@
+# Cold start: the index and all eight factors are on screen without any prompt.
+appId: ua.kliuye.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: 'Індекс кльову'
+- assertVisible: 'Найкраще вікно.*'
+- assertVisible: 'З чого складається'
+- assertVisible: 'Вітер'
+- assertVisible: 'Тиск'
+- assertVisible: 'Сонце'
+- assertNotVisible: '.*(Allow|Дозволити).*while using.*'
