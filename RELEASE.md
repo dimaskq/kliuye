@@ -20,7 +20,7 @@ Never in the repository. Required:
 
 | Name                             | Where                       | What for                        |
 | -------------------------------- | --------------------------- | ------------------------------- |
-| `EXPO_TOKEN`                     | GitHub Secrets              | EAS Build/Submit from CI        |
+| `EXPO_TOKEN`                     | GitHub Secrets              | the manual "EAS build" workflow |
 | App Store Connect API key        | EAS Secrets                 | `eas submit --platform ios`     |
 | Google Play service account JSON | `secrets/` (git-ignored)    | `eas submit --platform android` |
 | Play upload key + passwords      | `secrets/upload-keystore.*` | signing local release builds    |
@@ -44,6 +44,10 @@ tiles, so there is no Google Cloud project and no billing account to keep.
   from Conventional Commits.
 
 ## 3. Building
+
+CI (`.github/workflows/ci.yml`) only verifies the code on every push. A cloud
+build runs on demand: **Actions → EAS build → Run workflow**, Android by default
+(iOS needs an Apple Developer account). It requires the `EXPO_TOKEN` secret.
 
 ```bash
 npx eas login
