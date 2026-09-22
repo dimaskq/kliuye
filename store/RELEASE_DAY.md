@@ -11,7 +11,7 @@
 | Підписаний AAB для Play        | `~/Desktop/Kliuye-1.0.0.aab`                  |
 | Іконка 512×512                 | `assets/store/play-icon-512.png`              |
 | Банер 1024×500                 | `assets/store/feature-graphic.png`            |
-| Скріншоти телефона             | `assets/store/screenshots/`                   |
+| Скріншоти телефона             | `assets/store/screenshots/uk/` і `.../en/`    |
 | Політика приватності (HTML)    | `docs/privacy/index.html`                     |
 | Ключ завантаження (upload key) | `secrets/upload-keystore.jks` + `.properties` |
 
@@ -65,8 +65,9 @@ Play Console сам веде по списку «Set up your app». Відпов
 - [ ] **Data safety** → таблиця з розділу 4 `google-play.md`
 - [ ] **Advertising ID** → No
 - [ ] **Store listing** → назва, короткий і повний опис, іконка, банер,
-      скріншоти з `assets/store/screenshots/`, категорія Sports, e-mail
-- [ ] Переклади лістингу en-US і bg-BG — **Store listing → Manage translations**
+      скріншоти з `assets/store/screenshots/uk/`, категорія Sports, e-mail
+- [ ] Переклади лістингу en-US і bg-BG — **Store listing → Manage translations**;
+      для en-US — скріншоти з `assets/store/screenshots/en/`
 
 ## 5. Завантажити збірку й відправити на рев'ю
 
