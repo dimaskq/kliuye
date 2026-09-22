@@ -2,8 +2,8 @@ import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { useBiteAlerts } from '@/features/alerts';
 import { OfflineNotice } from '@/features/offline';
-import { useBiteAlerts } from '@/hooks';
 import { TabBar, colors } from '@/ui';
 import type { IconName } from '@/ui';
 

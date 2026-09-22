@@ -1,6 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as BackgroundTask from 'expo-background-task';
 import * as Notifications from 'expo-notifications';
 import { HttpResponse, http } from 'msw';
 
+import { storageKeys } from '@/services/storage';
 import { usePreferences, useSelection } from '@/store';
 import { makeForecastResponse, makeMarineResponse } from '@tests/factories/open-meteo';
 import { server } from '@tests/msw/server';
@@ -26,6 +29,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 beforeEach(() => {
   jest.useRealTimers();
   jest.clearAllMocks();
+  void AsyncStorage.clear();
   usePreferences.setState(initialPreferences, true);
   useSelection.setState(initialSelection, true);
   server.use(
@@ -59,5 +63,28 @@ describe('useBiteAlerts', () => {
       expect(notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalled(),
     );
     expect(notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  }, 20_000);
+
+  it('keeps refreshing between visits: saves the place and starts the 9-hour task', async () => {
+    usePreferences.setState({ toggles: { offlineMaps: true, notifications: true } });
+    await renderAlerts();
+
+    await waitFor(() =>
+      expect(BackgroundTask.registerTaskAsync).toHaveBeenCalledWith('kliuye.bite-alert-refresh', {
+        minimumInterval: 540,
+      }),
+    );
+    const saved = JSON.parse((await AsyncStorage.getItem(storageKeys.alertTarget)) ?? '{}');
+    expect(saved).toMatchObject({ place: 'Затока за дамбою', species: 'all', language: 'uk' });
+  }, 20_000);
+
+  it('forgets the place and stops the task when alerts go off', async () => {
+    await AsyncStorage.setItem(storageKeys.alertTarget, '{}');
+    await renderAlerts();
+
+    await waitFor(async () =>
+      expect(await AsyncStorage.getItem(storageKeys.alertTarget)).toBeNull(),
+    );
+    expect(BackgroundTask.registerTaskAsync).not.toHaveBeenCalled();
   }, 20_000);
 });

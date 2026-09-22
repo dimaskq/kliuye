@@ -50,9 +50,12 @@ export function biteInputsFor(
   };
 }
 
+/** All a model needs from a spot: which way its bank faces. */
+type Shore = Pick<Spot, 'shoreBearingDeg'>;
+
 function inputsAt(
   forecast: Forecast,
-  spot: Spot,
+  spot: Shore,
   dayOffset: number,
   species: SpeciesId,
   hour: number,
@@ -68,7 +71,7 @@ function inputsAt(
 /** Today's index for one species at one hour — the number on a chip or a pin. */
 export function scoreValueAt(
   forecast: Forecast,
-  spot: Spot,
+  spot: Shore,
   species: SpeciesId,
   hour: number,
 ): number | undefined {
@@ -86,7 +89,7 @@ type DayModel = Pick<BiteModel, 'curve' | 'week' | 'today'>;
  */
 const dayModels = new WeakMap<Forecast, Map<string, DayModel>>();
 
-function dayModelFor(forecast: Forecast, spot: Spot, species: SpeciesId): DayModel | undefined {
+function dayModelFor(forecast: Forecast, spot: Shore, species: SpeciesId): DayModel | undefined {
   const key = `${spot.shoreBearingDeg ?? ''}|${species}`;
   const cached = dayModels.get(forecast)?.get(key);
   if (cached !== undefined) return cached;
@@ -116,6 +119,15 @@ function dayModelFor(forecast: Forecast, spot: Spot, species: SpeciesId): DayMod
   perForecast.set(key, model);
   dayModels.set(forecast, perForecast);
   return model;
+}
+
+/** The seven days ahead for one species — what the bite alerts are planned from. */
+export function weeklyScores(
+  forecast: Forecast,
+  spot: Shore,
+  species: SpeciesId,
+): DailyBiteScore[] | undefined {
+  return dayModelFor(forecast, spot, species)?.week;
 }
 
 /**

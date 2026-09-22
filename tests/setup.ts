@@ -78,6 +78,36 @@ jest.mock('@maplibre/maplibre-react-native', () => {
   };
 });
 
+/** Background work is a registry the tests can inspect; nothing runs on its own. */
+jest.mock('expo-task-manager', () => {
+  const tasks = new Map<string, () => Promise<unknown>>();
+  const registered = new Set<string>();
+  return {
+    defineTask: jest.fn((name: string, run: () => Promise<unknown>) => tasks.set(name, run)),
+    isTaskDefined: jest.fn((name: string) => tasks.has(name)),
+    isTaskRegisteredAsync: jest.fn((name: string) => Promise.resolve(registered.has(name))),
+    __tasks: tasks,
+    __registered: registered,
+  };
+});
+
+jest.mock('expo-background-task', () => {
+  const { __registered: registered } = jest.requireMock('expo-task-manager') as {
+    __registered: Set<string>;
+  };
+  return {
+    BackgroundTaskResult: { Success: 1, Failed: 2 },
+    registerTaskAsync: jest.fn((name: string) => {
+      registered.add(name);
+      return Promise.resolve();
+    }),
+    unregisterTaskAsync: jest.fn((name: string) => {
+      registered.delete(name);
+      return Promise.resolve();
+    }),
+  };
+});
+
 /** Connected by default: offline is the exception a test opts into. */
 jest.mock('expo-network', () => ({
   getNetworkStateAsync: jest.fn(() =>

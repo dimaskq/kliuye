@@ -12,6 +12,7 @@
 | Analytics     | none                                         | no ATT prompt, no advertising IDs                                  |
 | Ads           | none, `AD_ID` blocked                        | no advertising-ID declaration needed in Play                       |
 | Notifications | local only, no push tokens                   | nothing goes to a server; `RECEIVE_BOOT_COMPLETED` comes from Expo |
+| Background    | one refresh task, ≥ 9 h apart, no FGS        | re-plans alerts; `FOREGROUND_SERVICE` from WorkManager is blocked  |
 | Minimum iOS   | 16.0 (Expo SDK 57 default)                   | set it in App Store Connect                                        |
 
 ## 1. Secrets

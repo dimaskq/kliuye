@@ -1,6 +1,7 @@
 /* eslint-disable import/no-named-as-default-member -- i18next's default export is the instance we configure. */
 import { getLocales } from 'expo-localization';
 import i18next from 'i18next';
+import type { TFunction } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import 'intl-pluralrules';
 
@@ -39,3 +40,12 @@ export async function changeLanguage(language: Language): Promise<void> {
 }
 
 export { i18next };
+
+/**
+ * A translator pinned to one language, for code that runs outside React — the
+ * background alert refresh — where no provider has initialised i18next yet.
+ */
+export function translatorFor(language: Language): TFunction {
+  initI18n(language);
+  return i18next.getFixedT(language);
+}

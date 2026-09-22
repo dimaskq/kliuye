@@ -247,12 +247,20 @@ With the switch on, the app schedules a **local** notification an hour before
 the best window on every day of the forecast whose verdict is "Good bite" or
 "Feeding frenzy" ([`src/domain/alerts`](src/domain/alerts/index.ts)). Alerts are
 re-planned whenever the forecast, the place or the language changes, and
-cancelled when the switch goes off ([`useBiteAlerts.ts`](src/hooks/useBiteAlerts.ts)).
+cancelled when the switch goes off ([`useBiteAlerts.ts`](src/features/alerts/useBiteAlerts.ts)).
 No push service or token is involved.
 
-The permission is asked only when the switch is turned on. Alerts are planned
-while the app is in use; a week without opening it adds no new days (background
-refresh would fix that and is not in v1).
+Between visits a background task re-plans them from a fresh forecast
+([`backgroundRefresh.ts`](src/features/alerts/backgroundRefresh.ts)): WorkManager
+on Android, BGTaskScheduler on iOS, at least 9 hours apart and only with a
+connection — the system picks the exact moment. It cannot read the position in
+the background (by design, there is no background-location permission), so
+while alerts are on the app keeps the place, its name, the species and the
+language on the device; turning alerts off deletes them and stops the task. The
+task is defined in the entry file [`index.ts`](index.ts), because Android can
+start the app with no screen just to run it.
+
+The permission is asked only when the switch is turned on.
 
 ## Journal
 

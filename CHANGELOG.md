@@ -34,7 +34,8 @@ The first public release, on Google Play.
   points are named after the nearest settlement rather than shown as
   coordinates.
 - **Bite alerts:** a local notification an hour before the best window on days
-  with a "Good bite" or "Feeding frenzy" verdict, re-planned with every forecast.
+  with a "Good bite" or "Feeding frenzy" verdict, re-planned with every forecast
+  and, between visits, by a background refresh at least 9 hours apart.
 - **Catch journal:** date, species, weight, place, note and up to six photos or
   videos, picked through the system picker with no media or camera permission;
   kept on the device only.

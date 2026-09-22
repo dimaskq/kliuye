@@ -127,6 +127,9 @@ const config: ExpoConfig = {
       'com.oppo.launcher.permission.WRITE_SETTINGS',
       'me.everything.badger.permission.BADGE_COUNT_READ',
       'me.everything.badger.permission.BADGE_COUNT_WRITE',
+      /* WorkManager brings this for long, user-visible jobs. The alert refresh
+         is a short background job, so the app never runs a foreground service. */
+      'android.permission.FOREGROUND_SERVICE',
     ],
   },
   web: {
@@ -175,6 +178,8 @@ const config: ExpoConfig = {
       },
     ],
     ['expo-notifications', { color: '#ff4a1c' }],
+    /* Re-plans bite alerts between visits (Android WorkManager, iOS BGTaskScheduler). */
+    'expo-background-task',
     /* MapLibre: free, keyless maps on both platforms (OpenFreeMap tiles). */
     '@maplibre/maplibre-react-native',
     /* Local release builds are signed with the Play upload key from secrets/. */

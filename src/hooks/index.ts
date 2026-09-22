@@ -1,8 +1,7 @@
-export { buildBiteModel, biteInputsFor, scoreValueAt } from './useBiteModel';
+export { buildBiteModel, biteInputsFor, scoreValueAt, weeklyScores } from './useBiteModel';
 export { useSpeciesScores } from './useSpeciesScores';
 export type { BiteModel } from './useBiteModel';
 export { useActiveSpot } from './useActiveSpot';
-export { useBiteAlerts } from './useBiteAlerts';
 export type { ActiveSpot } from './useActiveSpot';
 export { useChoosePoint } from './useChoosePoint';
 export { useCurrentForecast } from './useCurrentForecast';
