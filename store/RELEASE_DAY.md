@@ -47,9 +47,12 @@ play.google.com/console → Personal → оплата $25 → верифікац
 
 ## 3. Створити застосунок (≈5 хв)
 
-**Create app** → назва `Клює — прогноз кльову` · мова за замовчуванням
-**Українська – uk-UA** · App · Free · поставити обидві галочки декларацій →
-Create.
+**Create app** → назва `Kliuye — Fishing Forecast` · мова за замовчуванням
+**English (United States) – en-US** · App · Free · три галочки декларацій →
+Create. Ідентифікатор пакета — `com.kliuye.app`, його вже не змінити.
+
+Англійська як мова за замовчуванням означає, що цей лістинг бачать усі, чиєї
+мови в нас немає. Українську й болгарську додаємо перекладами (крок 4).
 
 ## 4. Заповнити все, що просить Dashboard (≈40 хв)
 
@@ -64,10 +67,12 @@ Play Console сам веде по списку «Set up your app». Відпов
 - [ ] **News app** → No · **Government** → No · **Financial** → none · **Health** → none
 - [ ] **Data safety** → таблиця з розділу 4 `google-play.md`
 - [ ] **Advertising ID** → No
-- [ ] **Store listing** → назва, короткий і повний опис, іконка, банер,
-      скріншоти з `assets/store/screenshots/uk/`, категорія Sports, e-mail
-- [ ] Переклади лістингу en-US і bg-BG — **Store listing → Manage translations**;
-      для en-US — скріншоти з `assets/store/screenshots/en/`
+- [ ] **Store listing (en-US)** → англійські назва, короткий і повний опис,
+      іконка, банер, скріншоти з `assets/store/screenshots/en/`, категорія
+      Sports, e-mail
+- [ ] **Manage translations → Add your own translations** → uk-UA і bg-BG:
+      тексти з `google-play.md`, для uk-UA скріншоти з
+      `assets/store/screenshots/uk/`
 
 ## 5. Завантажити збірку й відправити на рев'ю
 
