@@ -1,5 +1,5 @@
 # The layout scrolls rather than clipping at the largest font scale.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp
 - assertVisible: 'Індекс кльову'

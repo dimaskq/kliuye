@@ -1,5 +1,5 @@
 # Denying location must leave every screen working, with a manual choice of place.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true

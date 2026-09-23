@@ -1,5 +1,5 @@
 # The water in view offers a route; the phone's maps app builds it.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true

@@ -4,7 +4,7 @@ import type { ExpoConfig } from 'expo/config';
  * Store-review critical choices are made here and justified in RELEASE.md:
  * phone-only, portrait-only, coarse location only, no advertising identifiers.
  */
-const BUNDLE_ID = 'ua.kliuye.app';
+const BUNDLE_ID = 'com.kliuye.app';
 
 const LOCATION_PURPOSE_EN =
   'To show the bite forecast for waters near you. You can also pick a water body manually.';

@@ -1,5 +1,5 @@
 # Drop a pin, save it under a name of one's own, and land on its forecast.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true

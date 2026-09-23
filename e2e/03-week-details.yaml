@@ -1,5 +1,5 @@
 # The week list expands one day at a time.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp
 - tapOn: 'Тиждень'

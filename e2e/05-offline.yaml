@@ -1,5 +1,5 @@
 # Offline shows the cached forecast with its age, keeps the map drawn, and never crashes.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true

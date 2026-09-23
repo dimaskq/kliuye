@@ -1,5 +1,5 @@
 # Cold start: the index and all eight factors are on screen without any prompt.
-appId: ua.kliuye.app
+appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true
