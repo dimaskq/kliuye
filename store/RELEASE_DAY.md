@@ -10,7 +10,7 @@
 | ------------------------------ | --------------------------------------------- |
 | Підписаний AAB для Play        | `~/Desktop/Kliuye-1.0.0.aab`                  |
 | Іконка 512×512                 | `assets/store/play-icon-512.png`              |
-| Банер 1024×500                 | `assets/store/feature-graphic.png`            |
+| Банер 1024×500 (en/uk/bg)      | `assets/store/feature-graphic*.png`           |
 | Скріншоти телефона             | `assets/store/screenshots/uk/` і `.../en/`    |
 | Політика приватності (HTML)    | `docs/privacy/index.html`                     |
 | Ключ завантаження (upload key) | `secrets/upload-keystore.jks` + `.properties` |

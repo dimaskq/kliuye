@@ -113,10 +113,21 @@ def flat(colour, path: str) -> None:
     Image.new("RGBA", (SIZE, SIZE), colour).save(path)
 
 
-def feature_graphic(path: str) -> None:
+def fitted(font_path: str, text: str, max_width: int, size: int) -> ImageFont.FreeTypeFont:
+    """The largest size at which `text` still fits `max_width`."""
+    while size > 8:
+        font = ImageFont.truetype(font_path, size)
+        if max(font.getlength(line) for line in text.split("\n")) <= max_width:
+            return font
+        size -= 2
+    return ImageFont.truetype(font_path, size)
+
+
+def feature_graphic(path: str, name: str, tagline: str) -> None:
     """Google Play's 1024×500 banner: the mark, the name, what it answers."""
     width, height = 1024, 500
     scale = SUPERSAMPLE
+    text_left, text_right = 470, 984
     image = Image.new("RGBA", (width * scale, height * scale), DEEP_WATER)
 
     overlay = Image.new("RGBA", image.size, TRANSPARENT)
@@ -126,15 +137,17 @@ def feature_graphic(path: str) -> None:
     hook = mark(360, TRANSPARENT, BLAZE, LURE, 0.9).resize((360 * scale, 360 * scale))
     image.alpha_composite(hook, (70 * scale, 70 * scale))
 
+    # Figtree has no Cyrillic, so Rubik carries every language at one weight.
+    room = (text_right - text_left) * scale
+    title = fitted("assets/fonts/Rubik_900Black.ttf", name, room, 150 * scale)
+    strap = fitted("assets/fonts/Rubik_700Bold.ttf", tagline, room, 32 * scale)
+
     draw = ImageDraw.Draw(image)
-    title = ImageFont.truetype("assets/fonts/Rubik_900Black.ttf", 150 * scale)
-    # Figtree has no Cyrillic; Rubik does.
-    tagline = ImageFont.truetype("assets/fonts/Rubik_700Bold.ttf", 32 * scale)
-    draw.text((470 * scale, 110 * scale), "Клює", font=title, fill=HAZE)
+    draw.text((text_left * scale, 110 * scale), name, font=title, fill=HAZE)
     draw.text(
-        (478 * scale, 300 * scale),
-        "Чи варто сьогодні на рибалку?\nВідповідь — за один погляд",
-        font=tagline,
+        ((text_left + 8) * scale, 300 * scale),
+        tagline,
+        font=strap,
         fill=(241, 245, 236, 220),
         spacing=10 * scale,
     )
@@ -155,5 +168,20 @@ if __name__ == "__main__":
     mark(512, DEEP_WATER, BLAZE, LURE, 0.6, ripples=True).convert("RGB").save(
         "assets/store/play-icon-512.png"
     )
-    feature_graphic("assets/store/feature-graphic.png")
+    # One banner per listing language; en-US is the default listing.
+    feature_graphic(
+        "assets/store/feature-graphic.png",
+        "Kliuye",
+        "Worth going fishing today?\nThe answer at a glance",
+    )
+    feature_graphic(
+        "assets/store/feature-graphic-uk.png",
+        "Клює",
+        "Чи варто сьогодні на рибалку?\nВідповідь — за один погляд",
+    )
+    feature_graphic(
+        "assets/store/feature-graphic-bg.png",
+        "Клює",
+        "Струва ли си днес за риба?\nОтговорът с един поглед",
+    )
     print("icons written to assets/ and assets/store/")

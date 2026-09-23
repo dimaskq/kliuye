@@ -94,7 +94,7 @@ npx eas build --profile production --platform android
 | Короткий опис | `Worth going fishing today? A bite index, the best window and a map.` |
 
 ```text
-Kliuye answers one question: is it worth going fishing today?
+Kliuye answers one question. Is it worth going fishing today?
 
 BITE INDEX 0–100
 Eight weather factors — pressure and its trend, wind, air and water temperature, cloud, rain, moon phase and time of day — become one number and a verdict, from “Dead” to “Feeding frenzy”.
@@ -170,11 +170,11 @@ The index is an estimate based on open weather data, not a guarantee of a catch.
 
 **Графіка** (усе вже в репозиторії):
 
-| Що                 | Вимога Play                | Файл                                  |
-| ------------------ | -------------------------- | ------------------------------------- |
-| Іконка             | 512×512 PNG                | `assets/store/play-icon-512.png`      |
-| Feature graphic    | 1024×500 PNG/JPG           | `assets/store/feature-graphic.png`    |
-| Скріншоти телефона | 2–8 шт., 9:16, від 1080 px | зняти з production-білда (див. нижче) |
+| Що                 | Вимога Play                | Файл                                                          |
+| ------------------ | -------------------------- | ------------------------------------------------------------- |
+| Іконка             | 512×512 PNG                | `assets/store/play-icon-512.png`                              |
+| Feature graphic    | 1024×500 PNG/JPG           | `assets/store/feature-graphic.png` (en), `-uk.png`, `-bg.png` |
+| Скріншоти телефона | 2–8 шт., 9:16, від 1080 px | зняти з production-білда (див. нижче)                         |
 
 Скріншоти — з реального білда на телефоні, без вигаданих чисел (вимога
 чесності лістингу). Рекомендований набір: «Сьогодні» з індексом; «Тиждень»
