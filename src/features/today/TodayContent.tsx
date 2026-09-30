@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { verdictNoteKey, verdictWordKey } from '@/domain/bite-index';
-import type { SpeciesId } from '@/domain/bite-index';
+import type { BiteScore, SpeciesId } from '@/domain/bite-index';
 import type { Tip } from '@/domain/tips';
 import type { BiteModel } from '@/hooks';
 import { usePreferences } from '@/store';
@@ -56,6 +56,11 @@ export type TodayContentProps = {
 };
 
 /** Everything below the location header, once a forecast is in hand. */
+/** The line under the verdict: why the fish is ruled out, when it is, else what the verdict means. */
+function verdictNoteFor(score: BiteScore): string {
+  return score.ruledOut === undefined ? verdictNoteKey(score.verdict) : `verdict.${score.ruledOut}`;
+}
+
 export function TodayContent({
   model,
   speciesId,
@@ -78,7 +83,7 @@ export function TodayContent({
         value={score.value}
         indexLabel={t('today.indexLabel')}
         verdictWord={verdict}
-        verdictNote={t(verdictNoteKey(score.verdict))}
+        verdictNote={t(verdictNoteFor(score))}
         windowLabel={t('today.bestWindow', {
           start: formatHour(score.bestWindow.startHour),
           end: formatHour(score.bestWindow.endHour),

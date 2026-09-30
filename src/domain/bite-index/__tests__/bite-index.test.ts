@@ -10,6 +10,13 @@ import {
   findBestWindow,
   FACTOR_IDS,
   FACTOR_WEIGHTS,
+  NONE,
+  PEAK,
+  SPECIES_IDS,
+  activityIn,
+  profileFor,
+  ruledOutFor,
+  speciesOf,
   totalWeight,
 } from '../index';
 import { WEIGHT_SUM_TOLERANCE } from '../weights';
@@ -84,10 +91,95 @@ describe('computeBiteScore', () => {
     expect(estimated.confidence).toBeLessThan(1);
   });
 
-  it('scores a species below its season lower than inside it', () => {
-    const winter = computeBiteScore(makeBiteInputs({ species: 'carp', month: 1 }));
-    const summer = computeBiteScore(makeBiteInputs({ species: 'carp', month: 7 }));
-    expect(winter.value).toBeLessThan(summer.value);
+  it('scores a poor month lower than a peak one', () => {
+    const summer = computeBiteScore(makeBiteInputs({ species: 'pike', month: 7 }));
+    const autumn = computeBiteScore(makeBiteInputs({ species: 'pike', month: 9 }));
+    expect(summer.value).toBeLessThan(autumn.value);
+  });
+});
+
+describe('bite seasons', () => {
+  it.each([
+    ['catfish', 1],
+    ['crucian', 12],
+    ['carp', 2],
+    ['bluefish', 3],
+    ['horseMackerel', 1],
+    ['mackerel', 11],
+    ['salmon', 2],
+    ['halibut', 2],
+  ] as const)('rules %s out in month %i, with the reason', (species, month) => {
+    const score = computeBiteScore(makeBiteInputs({ species, month }));
+    expect(score.value).toBe(0);
+    expect(score.ruledOut).toBe('noSeason');
+  });
+
+  it('puts the missing sea before the season as the reason', () => {
+    expect(ruledOutFor({ species: 'bluefish', month: 3, seaNearby: false })).toBe('noSea');
+  });
+
+  it('follows the fish into its season', () => {
+    const score = computeBiteScore(makeBiteInputs({ species: 'catfish', month: 7 }));
+    expect(score.value).toBeGreaterThan(0);
+    expect(score.ruledOut).toBeUndefined();
+  });
+
+  it('gives every species twelve levels between 0 and 1, and a best month', () => {
+    SPECIES_IDS.forEach((species) => {
+      const { activity } = profileFor(species);
+      expect(activity).toHaveLength(12);
+      activity.forEach((level) => {
+        expect(level).toBeGreaterThanOrEqual(0);
+        expect(level).toBeLessThanOrEqual(1);
+      });
+      expect(Math.max(...activity)).toBe(PEAK);
+    });
+  });
+
+  it('treats a month outside 1–12 as no season rather than crashing', () => {
+    expect(activityIn(profileFor('pike').activity, 13)).toBe(NONE);
+  });
+});
+
+describe('sea fish far from the sea', () => {
+  const inland = { month: 7, seaNearby: false } as const;
+
+  it.each(speciesOf('sea'))('rules %s out with an index of 0', (species) => {
+    const score = computeBiteScore(makeBiteInputs({ ...inland, species }));
+    expect(score.value).toBe(0);
+    expect(score.verdict).toBe('dead');
+    expect(score.ruledOut).toBe('noSea');
+    expect(computeHourlyCurve(makeBiteInputs({ ...inland, species })).every((v) => v === 0)).toBe(
+      true,
+    );
+  });
+
+  it('zeroes every day of the week, not only today', () => {
+    const { species: _ignored, ...day } = makeBiteInputs({ ...inland });
+    const week = computeWeeklyForecast({ species: 'cod', days: [day, day, day] });
+    expect(week.map((entry) => entry.value)).toEqual([0, 0, 0]);
+  });
+
+  it('still scores sea fish at the coast', () => {
+    const coast = computeBiteScore(
+      makeBiteInputs({ species: 'mackerel', month: 7, seaNearby: true }),
+    );
+    expect(coast.value).toBeGreaterThan(0);
+    expect(coast.ruledOut).toBeUndefined();
+  });
+
+  it('rules nothing out while the coast is not known yet', () => {
+    const unknown = makeBiteInputs({ species: 'mackerel', month: 7 });
+    expect(computeScoreValue(unknown)).toBe(computeScoreValue({ ...unknown, seaNearby: true }));
+  });
+
+  it('leaves freshwater fish and the mixed baseline alone', () => {
+    for (const species of ['pike', 'all'] as const) {
+      const far = computeScoreValue(makeBiteInputs({ ...inland, species }));
+      const near = computeScoreValue(makeBiteInputs({ month: 7, species, seaNearby: true }));
+      expect(far).toBe(near);
+      expect(far).toBeGreaterThan(0);
+    }
   });
 });
 

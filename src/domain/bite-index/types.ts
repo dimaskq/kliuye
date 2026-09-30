@@ -15,6 +15,11 @@ export const SPECIES_IDS = [
   'horseMackerel',
   'bluefish',
   'goby',
+  'saithe',
+  'cod',
+  'mackerel',
+  'salmon',
+  'halibut',
 ] as const;
 export type SpeciesId = (typeof SPECIES_IDS)[number];
 
@@ -97,6 +102,11 @@ export type BiteInputs = {
   moon: MoonState;
   /** Compass bearing, in degrees, of the open water seen from the bank. */
   shoreBearingDeg?: number | undefined;
+  /**
+   * Whether there is sea within reach of the spot. `false` rules the sea species
+   * out; `undefined` means we could not tell yet, and nothing is ruled out.
+   */
+  seaNearby?: boolean | undefined;
 };
 
 export type BestWindow = {
@@ -112,7 +122,15 @@ export type BiteScore = {
   factors: FactorScore[];
   bestWindow: BestWindow;
   confidence: number;
+  /** Why the index is 0 regardless of the weather, when it is. */
+  ruledOut: RuledOut | undefined;
 };
+
+/**
+ * `noSea` — a sea fish with no sea within reach; `noSeason` — a month in which
+ * the species is not caught at all (dormant, migrated away, or closed).
+ */
+export type RuledOut = 'noSea' | 'noSeason';
 
 export type DailyBiteScore = BiteScore & {
   /** Days from today: 0 is today. */

@@ -58,6 +58,16 @@ function ForecastError({ error, onRetry }: { error: unknown; onRetry: () => void
 
 /** Answers the one question: is it worth going out today? */
 export function TodayScreen(): React.JSX.Element {
+  /* The location dialog sits over every state — loading, error or forecast. */
+  return (
+    <>
+      <TodayBody />
+      <LocationPrompt />
+    </>
+  );
+}
+
+function TodayBody(): React.JSX.Element {
   const { t } = useTranslation();
   const dates = useDateFormat();
   const labelOf = useSpotLabel();
@@ -85,7 +95,6 @@ export function TodayScreen(): React.JSX.Element {
           refreshing={reloading}
           onRefresh={reload}
         />
-        {forecastState.canOfferLocation ? <LocationPrompt /> : null}
         {isStale ? (
           <StaleBadge label={t('common.staleData', { time: dates.time(fetchedAt) })} />
         ) : null}

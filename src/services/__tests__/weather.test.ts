@@ -1,9 +1,11 @@
 import { HttpResponse, http } from 'msw';
 
 import { COORDINATE_PRECISION } from '@/domain/geo';
+import { encodeTile } from '@tests/factories/mvt';
 import { makeForecastResponse, makeMarineResponse } from '@tests/factories/open-meteo';
 import { server } from '@tests/msw/server';
 
+import { TILEJSON_URL, resetSeaNearbyCache } from '../coast';
 import { PAST_DAYS, fetchForecast, hourOfDay, monthOf, toForecast } from '../weather';
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -12,7 +14,12 @@ const NOW = new Date('2025-04-12T05:41:00Z');
 const KYIV_SEA = { latitude: 50.583_71, longitude: 30.492_19 };
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-beforeEach(() => jest.useRealTimers());
+beforeEach(() => {
+  jest.useRealTimers();
+  resetSeaNearbyCache();
+  /* The coast check is its own suite; here it simply cannot tell. */
+  server.use(http.get(TILEJSON_URL, () => new HttpResponse(null, { status: 404 })));
+});
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
@@ -90,6 +97,24 @@ describe('fetchForecast', () => {
       http.get(MARINE_URL, () => HttpResponse.json(makeMarineResponse())),
     );
     await expect(fetchForecast(KYIV_SEA, NOW)).rejects.toMatchObject({ kind: 'validation' });
+  });
+
+  it('leaves the sea question open when the coast check cannot answer', async () => {
+    serveForecast();
+    await expect(fetchForecast(KYIV_SEA, NOW)).resolves.toMatchObject({ seaNearby: undefined });
+  });
+
+  it('carries the answer of the coast check', async () => {
+    serveForecast();
+    server.use(
+      http.get(TILEJSON_URL, () =>
+        HttpResponse.json({ tiles: ['https://tiles.example.test/{z}/{x}/{y}.pbf'] }),
+      ),
+      http.get('https://tiles.example.test/:z/:x/:y', () =>
+        HttpResponse.arrayBuffer(encodeTile([{ name: 'water', features: [] }]).buffer),
+      ),
+    );
+    await expect(fetchForecast(KYIV_SEA, NOW)).resolves.toMatchObject({ seaNearby: false });
   });
 
   it('ignores a marine payload that does not match the schema', async () => {

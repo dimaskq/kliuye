@@ -17,6 +17,7 @@ function useRowMeta(): (row: Row) => string {
   return (row: Row) => {
     const [from, to] = row.optimum;
     const optimum = t('speciesPicker.optimum', { from, to });
+    if (row.ruledOut !== undefined) return `${optimum} · ${t(`speciesPicker.${row.ruledOut}`)}`;
     return row.inSeason ? optimum : `${optimum} · ${t('speciesPicker.outOfSeason')}`;
   };
 }
@@ -61,7 +62,7 @@ export function SpeciesScreen(): React.JSX.Element {
   const metaOf = useRowMeta();
   const speciesId = useSelection((state) => state.speciesId);
   const setSpecies = useSelection((state) => state.setSpecies);
-  const { model } = useCurrentForecast();
+  const { model, forecast } = useCurrentForecast();
   const scores = useSpeciesScores();
 
   /* The catalogue is opened over Today, so a choice dismisses back down to it.
@@ -81,7 +82,11 @@ export function SpeciesScreen(): React.JSX.Element {
           {t('speciesPicker.subtitle')}
         </Text>
       </View>
-      {speciesGroups(scores, model?.today.month ?? new Date().getMonth() + 1).map((group) => (
+      {speciesGroups(
+        scores,
+        model?.today.month ?? new Date().getMonth() + 1,
+        forecast?.seaNearby,
+      ).map((group) => (
         <Group
           key={group.habitat}
           group={group}

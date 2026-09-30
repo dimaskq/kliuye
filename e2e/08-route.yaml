@@ -3,6 +3,10 @@ appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true
+# Put off the location dialog, when it is shown at all.
+- tapOn:
+    text: 'Пізніше'
+    optional: true
 - tapOn: 'Мапа'
 - assertVisible: 'Де будемо рибачити?'
 # Location is optional: the route must be there either way.

@@ -18,6 +18,8 @@ export const storageKeys = {
   places: `${NAMESPACE}.places`,
   /** Where and for what the bite alerts are planned, for the background refresh. */
   alertTarget: `${NAMESPACE}.alert-target`,
+  /** Whether each place has sea within reach — coastlines do not move, so it is kept. */
+  seaNearby: `${NAMESPACE}.sea-nearby`,
 } as const;
 
 export type StorageKey = (typeof storageKeys)[keyof typeof storageKeys];

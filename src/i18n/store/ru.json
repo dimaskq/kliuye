@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "Чтобы показать прогноз клёва для водоёмов рядом с вами. Вы также можете выбрать водоём вручную.",
+    "CFBundleDisplayName": "Kliuye",
+    "NSPhotoLibraryUsageDescription": "Чтобы добавить фото и видео вашего улова в дневник. Файлы остаются на устройстве."
+  }
+}

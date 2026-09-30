@@ -15,7 +15,7 @@ const PHOTOS_PURPOSE_EN =
 const config: ExpoConfig = {
   name: 'Клює',
   slug: 'kliuye',
-  version: '1.0.0',
+  version: '1.1.0',
   scheme: 'kliuye',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
@@ -25,11 +25,12 @@ const config: ExpoConfig = {
     uk: './src/i18n/store/uk.json',
     en: './src/i18n/store/en.json',
     bg: './src/i18n/store/bg.json',
+    ru: './src/i18n/store/ru.json',
   },
   ios: {
     bundleIdentifier: BUNDLE_ID,
     supportsTablet: false,
-    buildNumber: '1',
+    buildNumber: '2',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       NSLocationWhenInUseUsageDescription: LOCATION_PURPOSE_EN,
@@ -74,7 +75,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: BUNDLE_ID,
-    versionCode: 1,
+    versionCode: 2,
     predictiveBackGestureEnabled: true,
     adaptiveIcon: {
       foregroundImage: './assets/android-icon-foreground.png',

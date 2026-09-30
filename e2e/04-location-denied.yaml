@@ -5,6 +5,10 @@ appId: com.kliuye.app
     clearState: true
     permissions:
       location: deny
+# Put off the location dialog, when it is shown at all.
+- tapOn:
+    text: 'Пізніше'
+    optional: true
 - assertVisible: 'Індекс кльову'
 - tapOn: 'Мапа'
 - assertVisible: 'Де будемо рибачити?'

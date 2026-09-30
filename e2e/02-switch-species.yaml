@@ -2,6 +2,10 @@
 appId: com.kliuye.app
 ---
 - launchApp
+# Put off the location dialog, when it is shown at all.
+- tapOn:
+    text: 'Пізніше'
+    optional: true
 - assertVisible: 'Вид риби'
 - copyTextFrom:
     id: 'bite-index-value'

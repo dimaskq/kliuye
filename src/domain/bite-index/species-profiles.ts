@@ -1,3 +1,6 @@
+import { SEA_PROFILES } from './sea-profiles';
+import { ALL_YEAR, FAIR, GOOD, NONE, PEAK, POOR } from './seasons';
+import type { MonthlyActivity } from './seasons';
 import type { Habitat, SpeciesId } from './types';
 
 /**
@@ -17,15 +20,13 @@ export type SpeciesProfile = {
   readonly pressureSensitivity: number;
   /** 0..1 — how much the dawn/dusk peaks dominate the daily curve. */
   readonly dielAmplitude: number;
-  /** Months (1–12) in which the species is actively targeted. */
-  readonly seasonMonths: readonly number[];
+  /**
+   * How well it bites in each month, January first — from Ukrainian and
+   * Bulgarian angling calendars for fresh water and the Black Sea, and from
+   * Norwegian season calendars and closures for the northern seas.
+   */
+  readonly activity: MonthlyActivity;
 };
-
-const ALL_YEAR = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
-const OPEN_WATER = [3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
-const WARM_SEASON = [5, 6, 7, 8, 9, 10] as const;
-const COLD_SEASON = [1, 2, 3, 4, 10, 11, 12] as const;
-const LATE_SUMMER = [7, 8, 9, 10] as const;
 
 export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
   all: {
@@ -35,9 +36,10 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 6,
     pressureSensitivity: 0.7,
     dielAmplitude: 0.6,
-    seasonMonths: ALL_YEAR,
+    activity: ALL_YEAR,
   },
 
+  /** Spawns in March; feeds hard after it and again in autumn; sluggish in the summer heat. */
   pike: {
     habitat: 'freshwater',
     optimalWaterC: [8, 16],
@@ -45,7 +47,7 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 7,
     pressureSensitivity: 0.85,
     dielAmplitude: 0.7,
-    seasonMonths: OPEN_WATER,
+    activity: [FAIR, FAIR, POOR, PEAK, GOOD, FAIR, POOR, FAIR, PEAK, PEAK, GOOD, GOOD],
   },
   perch: {
     habitat: 'freshwater',
@@ -54,8 +56,9 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 6,
     pressureSensitivity: 0.7,
     dielAmplitude: 0.75,
-    seasonMonths: ALL_YEAR,
+    activity: [GOOD, GOOD, PEAK, FAIR, GOOD, GOOD, FAIR, GOOD, PEAK, PEAK, GOOD, GOOD],
   },
+  /** Spawns and guards its nest in April–May; best from September to November. */
   zander: {
     habitat: 'freshwater',
     optimalWaterC: [12, 20],
@@ -63,8 +66,9 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 5,
     pressureSensitivity: 0.8,
     dielAmplitude: 0.9,
-    seasonMonths: OPEN_WATER,
+    activity: [FAIR, FAIR, GOOD, POOR, POOR, GOOD, FAIR, GOOD, PEAK, PEAK, PEAK, FAIR],
   },
+  /** Deep and slow in winter; bites best in summer and on the pre-spawn run in April. */
   bream: {
     habitat: 'freshwater',
     optimalWaterC: [16, 24],
@@ -72,7 +76,7 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 4,
     pressureSensitivity: 0.55,
     dielAmplitude: 0.5,
-    seasonMonths: WARM_SEASON,
+    activity: [POOR, POOR, FAIR, GOOD, FAIR, PEAK, GOOD, PEAK, GOOD, FAIR, POOR, POOR],
   },
   roach: {
     habitat: 'freshwater',
@@ -81,8 +85,9 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 5,
     pressureSensitivity: 0.5,
     dielAmplitude: 0.45,
-    seasonMonths: ALL_YEAR,
+    activity: [FAIR, FAIR, GOOD, PEAK, FAIR, GOOD, FAIR, GOOD, PEAK, GOOD, FAIR, FAIR],
   },
+  /** Dormant once the water drops below ~6 °C: December to February is off. */
   carp: {
     habitat: 'freshwater',
     optimalWaterC: [18, 26],
@@ -90,8 +95,9 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 4,
     pressureSensitivity: 0.45,
     dielAmplitude: 0.35,
-    seasonMonths: WARM_SEASON,
+    activity: [NONE, NONE, POOR, FAIR, GOOD, PEAK, GOOD, PEAK, PEAK, FAIR, POOR, NONE],
   },
+  /** Winters in deep pits and does not feed; wakes at ~10 °C water, late April. */
   catfish: {
     habitat: 'freshwater',
     optimalWaterC: [18, 26],
@@ -99,8 +105,9 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 5,
     pressureSensitivity: 0.6,
     dielAmplitude: 0.9,
-    seasonMonths: WARM_SEASON,
+    activity: [NONE, NONE, NONE, POOR, FAIR, GOOD, PEAK, PEAK, PEAK, FAIR, NONE, NONE],
   },
+  /** Buries itself in the silt for the winter; spring and summer fish. */
   crucian: {
     habitat: 'freshwater',
     optimalWaterC: [18, 26],
@@ -108,63 +115,10 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     windToleranceMs: 4,
     pressureSensitivity: 0.4,
     dielAmplitude: 0.5,
-    seasonMonths: WARM_SEASON,
+    activity: [NONE, NONE, POOR, GOOD, PEAK, PEAK, GOOD, GOOD, FAIR, POOR, NONE, NONE],
   },
 
-  flounder: {
-    habitat: 'sea',
-    optimalWaterC: [6, 14],
-    waterToleranceC: 8,
-    windToleranceMs: 8,
-    pressureSensitivity: 0.5,
-    dielAmplitude: 0.35,
-    seasonMonths: COLD_SEASON,
-  },
-  turbot: {
-    habitat: 'sea',
-    optimalWaterC: [8, 16],
-    waterToleranceC: 7,
-    windToleranceMs: 7,
-    pressureSensitivity: 0.55,
-    dielAmplitude: 0.4,
-    seasonMonths: [4, 5, 6, 9, 10, 11],
-  },
-  mullet: {
-    habitat: 'sea',
-    optimalWaterC: [16, 24],
-    waterToleranceC: 6,
-    windToleranceMs: 5,
-    pressureSensitivity: 0.6,
-    dielAmplitude: 0.6,
-    seasonMonths: [6, 7, 8, 9, 10],
-  },
-  horseMackerel: {
-    habitat: 'sea',
-    optimalWaterC: [15, 22],
-    waterToleranceC: 6,
-    windToleranceMs: 5,
-    pressureSensitivity: 0.65,
-    dielAmplitude: 0.8,
-    seasonMonths: WARM_SEASON,
-  },
-  bluefish: {
-    habitat: 'sea',
-    optimalWaterC: [18, 24],
-    waterToleranceC: 5,
-    windToleranceMs: 6,
-    pressureSensitivity: 0.7,
-    dielAmplitude: 0.85,
-    seasonMonths: LATE_SUMMER,
-  },
-  goby: {
-    habitat: 'sea',
-    optimalWaterC: [10, 24],
-    waterToleranceC: 8,
-    windToleranceMs: 6,
-    pressureSensitivity: 0.4,
-    dielAmplitude: 0.35,
-    seasonMonths: ALL_YEAR,
-  },
+  ...SEA_PROFILES,
 };
 
 export function profileFor(species: SpeciesId): SpeciesProfile {

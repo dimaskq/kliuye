@@ -12,9 +12,12 @@ export type LocationState = {
   city: string | undefined;
   /** True once the stored permission has been read, so we ask at most once. */
   hydrated: boolean;
+  /** "Later" on the permission dialog: it stays away until the next launch. */
+  promptDismissed: boolean;
   setDenied: () => void;
   setPosition: (origin: LatLng, city: string | undefined) => void;
   setHydrated: () => void;
+  dismissPrompt: () => void;
 };
 
 /**
@@ -26,7 +29,9 @@ export const useLocation = create<LocationState>()((set) => ({
   origin: undefined,
   city: undefined,
   hydrated: false,
+  promptDismissed: false,
   setDenied: () => set({ status: 'denied', origin: undefined, city: undefined, hydrated: true }),
   setPosition: (origin, city) => set({ status: 'granted', origin, city, hydrated: true }),
   setHydrated: () => set({ hydrated: true }),
+  dismissPrompt: () => set({ promptDismissed: true }),
 }));

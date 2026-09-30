@@ -1,5 +1,6 @@
 import { COORDINATE_PRECISION } from '@/domain/geo';
 
+import { isSeaNearby } from '../coast';
 import { AppError } from '../errors';
 import { getJson } from '../http';
 
@@ -74,10 +75,14 @@ export async function fetchForecast(
   params.set('daily', DAILY_FIELDS);
   params.set('wind_speed_unit', 'ms');
 
-  const [payload, marine] = await Promise.all([
+  const [payload, marine, seaNearby] = await Promise.all([
     getJson(`${FORECAST_URL}?${params.toString()}`, { signal }),
     fetchMarine(coordinates, signal),
+    isSeaNearby(coordinates, signal),
   ]);
 
-  return toForecast(parse(forecastResponseSchema, payload, 'Forecast'), marine, now.getTime());
+  return {
+    ...toForecast(parse(forecastResponseSchema, payload, 'Forecast'), marine, now.getTime()),
+    seaNearby,
+  };
 }

@@ -3,6 +3,10 @@ appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true
+# Put off the location dialog, when it is shown at all.
+- tapOn:
+    text: 'Пізніше'
+    optional: true
 - assertVisible: 'Індекс кльову'
 # Open the map with a connection: this is what fills the offline tile cache.
 - tapOn: 'Мапа'

@@ -108,7 +108,7 @@ export function canShift(timestamp: number, delta: number, now: number): boolean
 
 /**
  * "2,4" and "2.4" both mean 2.4 kg — the comma is the decimal separator in
- * Ukrainian and Bulgarian keyboards. Anything unreadable weighs nothing.
+ * Ukrainian, Bulgarian and Russian keyboards. Anything unreadable weighs nothing.
  */
 export function parseWeight(input: string): number {
   const value = Number.parseFloat(input.replace(',', '.'));

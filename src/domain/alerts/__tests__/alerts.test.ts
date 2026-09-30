@@ -10,6 +10,7 @@ function day(dayOffset: number, value: number, startHour: number): DailyBiteScor
     factors: [],
     bestWindow: { startHour, endHour: startHour + 3 },
     confidence: 1,
+    ruledOut: undefined,
   };
 }
 

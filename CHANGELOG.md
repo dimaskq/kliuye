@@ -6,6 +6,34 @@ Conventional Commits.
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-09-26
+
+### Added
+
+- **Russian** interface language, picked up from the device like the others;
+  the language picker is now two chips to a row.
+- **Northern sea fish:** saithe, cod, mackerel, salmon and halibut.
+- **Bite seasons:** each species has a bite level for every month, from angling
+  calendars for Ukraine, the Black Sea and Norway. In a month the fish is not
+  caught at all — catfish in winter, bluefish before August, halibut during the
+  Norwegian closure — the index is 0 and the screen says it is out of season.
+
+### Changed
+
+- The location request is now a dialog in the middle of a dimmed screen instead
+  of a card on Today, with a fuller explanation of why the position is needed and
+  where it goes; "Later" puts it off until the next launch.
+
+### Fixed
+
+- The first launch now opens in the device language — before, the stored
+  default overrode it and every new install opened in Ukrainian. A device in a
+  language we do not speak gets English.
+
+- Sea fish no longer get a forecast far from the sea: with no sea within 5 km
+  of the spot their index is 0 and the screen says why. The coast is read from
+  the OpenFreeMap vector tile around the spot and remembered per place.
+
 ## [1.0.0] — 2026-09-21
 
 The first public release, on Google Play.

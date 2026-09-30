@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { UnitSystem } from '@/domain/units';
-import { DEFAULT_LANGUAGE } from '@/i18n';
+import { detectLanguage } from '@/i18n';
 import type { Language } from '@/i18n';
 import { storageKeys } from '@/services/storage';
 
@@ -39,7 +39,8 @@ function knownToggles(stored: Partial<Record<string, boolean>> | undefined) {
 export const usePreferences = create<PreferencesState>()(
   persist(
     (set) => ({
-      language: DEFAULT_LANGUAGE,
+      /* The device language on first launch; once the user picks one, the stored choice wins. */
+      language: detectLanguage(),
       unitSystem: 'metric',
       toggles: DEFAULT_TOGGLES,
       setLanguage: (language) => set({ language }),

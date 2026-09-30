@@ -18,7 +18,7 @@ beforeEach(() => {
 });
 
 describe('usePreferences', () => {
-  it('starts in Ukrainian and metric, with only the offline map on', () => {
+  it('starts in the device language and metric, with only the offline map on', () => {
     const state = usePreferences.getState();
     expect(state.language).toBe('uk');
     expect(state.unitSystem).toBe('metric');

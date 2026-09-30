@@ -1,4 +1,5 @@
 import { FACTOR_COMPUTATIONS } from './factors';
+import { NONE, activityIn } from './seasons';
 import { profileFor } from './species-profiles';
 import { FACTOR_IDS } from './types';
 import type {
@@ -7,6 +8,7 @@ import type {
   BiteScore,
   DailyBiteScore,
   FactorScore,
+  RuledOut,
   WeeklyInputs,
 } from './types';
 import { verdictFor } from './verdicts';
@@ -14,11 +16,20 @@ import { FACTOR_WEIGHTS } from './weights';
 
 export const HOURS_PER_DAY = 24;
 export const BEST_WINDOW_HOURS = 3;
-/** Out of its season a species is still catchable, just markedly less so. */
-const OFF_SEASON_MULTIPLIER = 0.75;
+/** Whether the species cannot be caught here and now at all, whatever the weather. */
+export function ruledOutFor(
+  inputs: Pick<BiteInputs, 'species' | 'month' | 'seaNearby'>,
+): RuledOut | undefined {
+  const profile = profileFor(inputs.species);
+  if (profile.habitat === 'sea' && inputs.seaNearby === false) return 'noSea';
+  if (activityIn(profile.activity, inputs.month) === NONE) return 'noSeason';
+  return undefined;
+}
 
+/** The month's bite level for the species, and 0 where it cannot be caught at all. */
 function seasonMultiplier(inputs: BiteInputs): number {
-  return profileFor(inputs.species).seasonMonths.includes(inputs.month) ? 1 : OFF_SEASON_MULTIPLIER;
+  if (ruledOutFor(inputs) !== undefined) return 0;
+  return activityIn(profileFor(inputs.species).activity, inputs.month);
 }
 
 /** Re-aims the inputs at another hour, picking up that hour's weather if we have it. */
@@ -87,6 +98,7 @@ export function computeBiteScore(
     factors,
     bestWindow: findBestWindow(curve),
     confidence: aggregateConfidence(factors),
+    ruledOut: ruledOutFor(inputs),
   };
 }
 
@@ -116,6 +128,7 @@ export type {
   FactorScore,
   Habitat,
   MoonState,
+  RuledOut,
   SpeciesId,
   SunTimes,
   VerdictId,
@@ -126,4 +139,6 @@ export type {
 export { FACTOR_WEIGHTS, totalWeight } from './weights';
 export { SPECIES_PROFILES, profileFor, speciesOf } from './species-profiles';
 export type { SpeciesProfile } from './species-profiles';
+export { FAIR, GOOD, IN_SEASON_FROM, NONE, PEAK, POOR, activityIn } from './seasons';
+export type { MonthlyActivity } from './seasons';
 export { verdictFor, verdictNoteKey, verdictWordKey } from './verdicts';

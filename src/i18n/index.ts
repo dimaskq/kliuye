@@ -7,17 +7,19 @@ import 'intl-pluralrules';
 
 import bg from './bg.json';
 import en from './en.json';
+import ru from './ru.json';
 import uk from './uk.json';
 
-export const SUPPORTED_LANGUAGES = ['uk', 'en', 'bg'] as const;
+export const SUPPORTED_LANGUAGES = ['uk', 'en', 'bg', 'ru'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
-export const DEFAULT_LANGUAGE: Language = 'uk';
+/** For a device in a language we do not speak, and for any string a bundle lacks. */
+export const DEFAULT_LANGUAGE: Language = 'en';
 
 function isSupported(code: string | null | undefined): code is Language {
   return SUPPORTED_LANGUAGES.includes(code as Language);
 }
 
-/** The device language when we speak it, Ukrainian otherwise. */
+/** The device language when we speak it, English otherwise. */
 export function detectLanguage(): Language {
   const code = getLocales().at(0)?.languageCode;
   return isSupported(code) ? code : DEFAULT_LANGUAGE;
@@ -27,7 +29,12 @@ export function detectLanguage(): Language {
 export function initI18n(language: Language = detectLanguage()): void {
   if (i18next.isInitialized) return;
   void i18next.use(initReactI18next).init({
-    resources: { uk: { translation: uk }, en: { translation: en }, bg: { translation: bg } },
+    resources: {
+      uk: { translation: uk },
+      en: { translation: en },
+      bg: { translation: bg },
+      ru: { translation: ru },
+    },
     lng: language,
     fallbackLng: DEFAULT_LANGUAGE,
     interpolation: { escapeValue: false },

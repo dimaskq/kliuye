@@ -1,5 +1,12 @@
-import { HABITATS, profileFor, speciesOf } from '@/domain/bite-index';
-import type { Habitat, SpeciesId } from '@/domain/bite-index';
+import {
+  HABITATS,
+  IN_SEASON_FROM,
+  activityIn,
+  profileFor,
+  ruledOutFor,
+  speciesOf,
+} from '@/domain/bite-index';
+import type { Habitat, RuledOut, SpeciesId } from '@/domain/bite-index';
 
 export type SpeciesRow = {
   id: SpeciesId;
@@ -7,6 +14,8 @@ export type SpeciesRow = {
   /** Optimal water band, and whether the month is one this fish is taken in. */
   optimum: readonly [number, number];
   inSeason: boolean;
+  /** Why this fish cannot be caught at the spot this month at all, if it cannot. */
+  ruledOut: RuledOut | undefined;
 };
 
 export type SpeciesGroup = {
@@ -22,6 +31,8 @@ export type SpeciesGroup = {
 export function speciesGroups(
   scores: Readonly<Record<SpeciesId, number>>,
   month: number,
+  /** Whether the spot has sea within reach; `undefined` rules nothing out. */
+  seaNearby?: boolean,
 ): SpeciesGroup[] {
   return HABITATS.map((habitat) => ({
     habitat,
@@ -31,7 +42,8 @@ export function speciesGroups(
         id,
         value: scores[id],
         optimum: profile.optimalWaterC,
-        inSeason: profile.seasonMonths.includes(month),
+        inSeason: activityIn(profile.activity, month) >= IN_SEASON_FROM,
+        ruledOut: ruledOutFor({ species: id, month, seaNearby }),
       };
     }),
   })).filter((group) => group.rows.length > 0);

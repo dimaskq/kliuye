@@ -47,6 +47,7 @@ export function biteInputsFor(
     hourlyWeather: day.hourlyWeather,
     sun: day.sun,
     moon: moonStateAt(new Date(forecast.fetchedAt + dayOffset * MS_PER_DAY)),
+    seaNearby: forecast.seaNearby,
   };
 }
 

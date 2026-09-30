@@ -5,6 +5,7 @@ import type { SpeciesId } from '@/domain/bite-index';
 import { SpeciesScreen, speciesGroups } from '@/features/species';
 import { useSelection } from '@/store';
 import { makeForecastResponse, makeMarineResponse } from '@tests/factories/open-meteo';
+import { serveCoast } from '@tests/msw/coast';
 import { server } from '@tests/msw/server';
 import { fireEvent, renderWithProviders, screen, waitFor } from '@tests/render';
 
@@ -55,6 +56,28 @@ describe('speciesGroups', () => {
     expect(july.find((row) => row.id === 'flounder')?.inSeason).toBe(false);
   });
 
+  it('marks the sea fish as out of reach where there is no sea', () => {
+    const inland = speciesGroups(scores, 7, false).flatMap((group) => group.rows);
+    expect(inland.filter((row) => row.ruledOut === 'noSea').map((row) => row.id)).toEqual(
+      speciesOf('sea'),
+    );
+    const coast = speciesGroups(scores, 7, true).flatMap((group) => group.rows);
+    const unknown = speciesGroups(scores, 7).flatMap((group) => group.rows);
+    expect([...coast, ...unknown].some((row) => row.ruledOut !== undefined)).toBe(false);
+  });
+
+  it('marks a fish that is not caught this month at all', () => {
+    const january = speciesGroups(scores, 1).flatMap((group) => group.rows);
+    expect(january.find((row) => row.id === 'catfish')?.ruledOut).toBe('noSeason');
+    expect(january.find((row) => row.id === 'pike')?.ruledOut).toBeUndefined();
+  });
+
+  it('includes the northern sea fish', () => {
+    expect(speciesOf('sea')).toEqual(
+      expect.arrayContaining(['saithe', 'cod', 'mackerel', 'salmon', 'halibut']),
+    );
+  });
+
   it('carries the optimal water band of each species', () => {
     const rows = speciesGroups(scores, 7).flatMap((group) => group.rows);
     expect(rows.find((row) => row.id === 'flounder')?.optimum).toEqual([6, 14]);
@@ -88,5 +111,14 @@ describe('SpeciesScreen', () => {
     await renderWithProviders(<SpeciesScreen />);
     await waitFor(() => expect(screen.getByText('Камбала')).toBeOnTheScreen());
     expect(screen.getAllByText(/вода \d+–\d+°/).length).toBeGreaterThan(1);
+  }, 20_000);
+
+  it('says the sea is too far for the sea fish at an inland spot', async () => {
+    await serveCoast(false);
+    await renderWithProviders(<SpeciesScreen />);
+    await waitFor(() => expect(screen.getByText('Тріска')).toBeOnTheScreen());
+    await waitFor(() =>
+      expect(screen.getAllByText(/моря поруч немає/)).toHaveLength(speciesOf('sea').length),
+    );
   }, 20_000);
 });

@@ -89,12 +89,12 @@ describe('LanguagePicker', () => {
     await renderWithProviders(
       <LanguagePicker
         selected="uk"
-        labels={{ uk: 'Українська', en: 'English', bg: 'Български' }}
+        labels={{ uk: 'Українська', en: 'English', bg: 'Български', ru: 'Русский' }}
         onSelect={onSelect}
       />,
     );
     expect(screen.getByRole('radio', { name: 'Українська' })).toBeSelected();
-    expect(screen.getAllByRole('radio')).toHaveLength(3);
+    expect(screen.getAllByRole('radio')).toHaveLength(4);
     await fireEvent.press(screen.getByRole('radio', { name: 'Български' }));
     expect(onSelect).toHaveBeenCalledWith('bg');
   });

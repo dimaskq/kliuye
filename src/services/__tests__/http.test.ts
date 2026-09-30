@@ -3,7 +3,7 @@ import { HttpResponse, http } from 'msw';
 import { server } from '@tests/msw/server';
 
 import { AppError, errorMessageKey, isOfflineError, toAppError } from '../errors';
-import { getJson } from '../http';
+import { getBytes, getJson } from '../http';
 
 const URL = 'https://example.test/data';
 
@@ -78,6 +78,18 @@ describe('getJson', () => {
       }),
     );
     await expect(getJson(URL, { timeoutMs: 1 })).rejects.toMatchObject({ kind: 'timeout' });
+  });
+});
+
+describe('getBytes', () => {
+  it('returns the raw body', async () => {
+    server.use(http.get(URL, () => HttpResponse.arrayBuffer(new Uint8Array([1, 2, 3]).buffer)));
+    await expect(getBytes(URL)).resolves.toEqual(new Uint8Array([1, 2, 3]));
+  });
+
+  it('fails the same typed way as a JSON request', async () => {
+    server.use(http.get(URL, () => new HttpResponse(null, { status: 404 })));
+    await expect(getBytes(URL)).rejects.toMatchObject({ kind: 'http', status: 404 });
   });
 });
 

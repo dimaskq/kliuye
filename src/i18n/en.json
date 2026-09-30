@@ -48,7 +48,9 @@
     "dead": {
       "word": "Dead",
       "note": "The weather has killed the bite. Better to sort tackle at home."
-    }
+    },
+    "noSea": "No sea within 5 km — this fish does not live here.",
+    "noSeason": "Out of season — this fish is not caught this month."
   },
   "species": {
     "all": "All species",
@@ -65,7 +67,12 @@
     "mullet": "Mullet",
     "horseMackerel": "Horse mackerel",
     "bluefish": "Bluefish",
-    "goby": "Goby"
+    "goby": "Goby",
+    "saithe": "Saithe",
+    "cod": "Cod",
+    "mackerel": "Mackerel",
+    "salmon": "Salmon",
+    "halibut": "Halibut"
   },
   "compass": {
     "n": "N",
@@ -180,10 +187,6 @@
     "summary": "{{cloud}}, {{wind}}"
   },
   "map": {
-    "permissionTitle": "Show waters near you",
-    "permissionBody": "To show the bite forecast for waters near you. You can also pick a water body manually.",
-    "permissionAllow": "Allow",
-    "permissionManual": "Pick a water manually",
     "placeholder": "Waters map",
     "searchPlaceholder": "Search a town or village",
     "searchLabel": "Search for a settlement",
@@ -217,6 +220,17 @@
     "route": "Route",
     "routeTitle": "How to get to “{{name}}”?",
     "routeByCar": "By car"
+  },
+  "locationPrompt": {
+    "title": "Allow access to your location",
+    "body": "Kliuye works out the bite index from the weather right where you fish. Pressure, wind and water temperature change within 20–30 km, so a forecast for the whole region often misses.",
+    "reasonWeather": "The forecast and the best bite window are for the waters near you, not for a point somewhere in the region.",
+    "reasonWaters": "The map opens where you are and can route you to the water.",
+    "reasonSea": "We check whether the sea is near, so sea fish are not offered where there are none.",
+    "privacy": "Only your approximate location, and only while the app is open. Coordinates rounded to about 1 km go to the Open-Meteo weather service, and OpenFreeMap provides the map. We have no servers or accounts of our own — details in the privacy policy.",
+    "allow": "Allow location",
+    "manual": "Pick a water on the map",
+    "later": "Later"
   },
   "tips": {
     "title": "Tips",
@@ -394,6 +408,7 @@
     "defaultName": "Angler",
     "defaultInitials": "K",
     "languageBg": "Български",
+    "languageRu": "Русский",
     "editProfile": "Edit profile",
     "editTitle": "My profile",
     "nameLabel": "Name",
@@ -476,6 +491,8 @@
     },
     "optimum": "water {{from}}–{{to}}°",
     "outOfSeason": "out of season",
+    "noSea": "no sea nearby",
+    "noSeason": "not biting now",
     "accessible": "{{name}}, index {{value}}, {{meta}}"
   },
   "notifications": {

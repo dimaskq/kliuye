@@ -4,13 +4,14 @@ import { format } from 'date-fns/format';
 import type { Locale } from 'date-fns/locale';
 import { bg } from 'date-fns/locale/bg';
 import { enGB } from 'date-fns/locale/en-GB';
+import { ru } from 'date-fns/locale/ru';
 import { uk } from 'date-fns/locale/uk';
 import { useCallback, useMemo } from 'react';
 
 import type { Language } from '@/i18n';
 import { usePreferences } from '@/store';
 
-const LOCALES: Readonly<Record<Language, Locale>> = { uk, en: enGB, bg };
+const LOCALES: Readonly<Record<Language, Locale>> = { uk, en: enGB, bg, ru };
 
 export type DateFormatter = {
   /** "сб, 12 квітня" */

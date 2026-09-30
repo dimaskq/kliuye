@@ -1,3 +1,4 @@
+import * as Location from 'expo-location';
 import { HttpResponse, http } from 'msw';
 
 import { CUSTOM_SPOT_ID } from '@/domain/spots';
@@ -10,6 +11,7 @@ import { TodayScreen } from '@/features/today';
 import { WeekScreen } from '@/features/week';
 import { useLocation, usePoints, usePreferences, useSelection } from '@/store';
 import { makeForecastResponse, makeMarineResponse } from '@tests/factories/open-meteo';
+import { serveCoast } from '@tests/msw/coast';
 import { server } from '@tests/msw/server';
 import { fireEvent, renderWithProviders, screen, waitFor } from '@tests/render';
 
@@ -25,6 +27,7 @@ const VARNA = { latitude: 43.21, longitude: 27.91 };
 beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 beforeEach(() => {
   jest.useRealTimers();
+  jest.clearAllMocks();
   usePreferences.setState(initialPreferences, true);
   useSelection.setState(initialSelection, true);
   usePoints.setState(initialPoints, true);
@@ -66,6 +69,44 @@ describe('TodayScreen', () => {
 
     await fireEvent.press(screen.getByLabelText(/^Щука, індекс/));
     expect(useSelection.getState().speciesId).toBe('pike');
+  }, 20_000);
+
+  it('rules a sea fish out far from the sea, and says why', async () => {
+    serveForecast();
+    await serveCoast(false);
+    useSelection.setState({ speciesId: 'cod' });
+    await renderWithProviders(<TodayScreen />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Моря в межах 5 км немає — ця риба тут не водиться.'),
+      ).toBeOnTheScreen(),
+    );
+    expect(screen.getByLabelText(/^Індекс кльову 0 зі 100/)).toBeOnTheScreen();
+  }, 20_000);
+
+  it('rules a fish out of season, and says why', async () => {
+    serveForecast();
+    await serveCoast(true);
+    /* The forecast fixture is for April, when bluefish is not in the Black Sea yet. */
+    useSelection.setState({ speciesId: 'bluefish' });
+    await renderWithProviders(<TodayScreen />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Зараз не сезон — у цей місяць ця риба не клює.')).toBeOnTheScreen(),
+    );
+    expect(screen.getByLabelText(/^Індекс кльову 0 зі 100/)).toBeOnTheScreen();
+  }, 20_000);
+
+  it('scores the same sea fish at the coast', async () => {
+    serveForecast();
+    await serveCoast(true);
+    useSelection.setState({ speciesId: 'cod' });
+    await renderWithProviders(<TodayScreen />);
+
+    await waitFor(() => expect(screen.getByText('Індекс кльову')).toBeOnTheScreen());
+    expect(screen.queryByText(/Моря в межах 5 км немає/)).toBeNull();
+    expect(screen.queryByLabelText(/^Індекс кльову 0 зі 100/)).toBeNull();
   }, 20_000);
 
   it('offers a retry, not a blank screen, when the service is down', async () => {
@@ -125,14 +166,70 @@ describe('TodayScreen header', () => {
 });
 
 describe('TodayScreen and location', () => {
-  it('offers the permission behind an explanation, never a bare system prompt', async () => {
+  it('offers the permission in a dialog that explains it, never a bare system prompt', async () => {
     serveForecast();
     await renderWithProviders(<TodayScreen />);
 
-    await waitFor(() => expect(screen.getByText('Показати водойми поруч')).toBeOnTheScreen());
-    expect(screen.getByRole('button', { name: 'Дозволити' })).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Обрати водойму вручну' })).toBeOnTheScreen();
+    await waitFor(() =>
+      expect(
+        screen.getByRole('header', { name: 'Дозвольте доступ до геопозиції' }),
+      ).toBeOnTheScreen(),
+    );
+    expect(screen.getByText(/Тиск, вітер і температура води змінюються/)).toBeOnTheScreen();
+    expect(screen.getByText(/чи є поруч море/)).toBeOnTheScreen();
+    expect(screen.getByText(/округлені приблизно до 1 км/)).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Дозволити геопозицію' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Обрати водойму на мапі' })).toBeOnTheScreen();
+    expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
   }, 20_000);
+
+  it('shows the dialog even while the forecast is still loading', async () => {
+    server.use(http.get(FORECAST_URL, () => new Promise(() => undefined)));
+    await renderWithProviders(<TodayScreen />);
+    expect(screen.getByText('Дозвольте доступ до геопозиції')).toBeOnTheScreen();
+  }, 20_000);
+
+  it('waits for the stored answer rather than flashing up at launch', async () => {
+    useLocation.setState({ hydrated: false });
+    /* The system has not answered yet whether the permission was granted. */
+    const read = jest.mocked(Location.getForegroundPermissionsAsync);
+    read.mockImplementation(() => new Promise(() => undefined));
+    try {
+      serveForecast();
+      await renderWithProviders(<TodayScreen />);
+      expect(screen.queryByText('Дозвольте доступ до геопозиції')).toBeNull();
+    } finally {
+      read.mockImplementation(() => Promise.resolve({ granted: false } as never));
+    }
+  }, 20_000);
+
+  it('asks the system only after a tap on "allow", and steps aside for it', async () => {
+    serveForecast();
+    await renderWithProviders(<TodayScreen />);
+    await waitFor(() =>
+      expect(screen.getByText('Дозвольте доступ до геопозиції')).toBeOnTheScreen(),
+    );
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Дозволити геопозицію' }));
+    expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryByText('Дозвольте доступ до геопозиції')).toBeNull());
+  }, 20_000);
+
+  it.each(['Пізніше', 'Обрати водойму на мапі'])(
+    'puts the dialog off until the next launch with "%s"',
+    async (label) => {
+      serveForecast();
+      await renderWithProviders(<TodayScreen />);
+      await waitFor(() => expect(screen.getByRole('button', { name: label })).toBeOnTheScreen());
+
+      await fireEvent.press(screen.getByRole('button', { name: label }));
+      await waitFor(() => expect(screen.queryByText('Дозвольте доступ до геопозиції')).toBeNull());
+      expect(useLocation.getState().promptDismissed).toBe(true);
+      expect(useLocation.getState().status).toBe('idle');
+      expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
+    },
+    20_000,
+  );
 
   it('forecasts for the device position, wherever that is', async () => {
     useLocation.setState({ status: 'granted', origin: VARNA, city: 'Варна', hydrated: true });
@@ -141,7 +238,7 @@ describe('TodayScreen and location', () => {
 
     await waitFor(() => expect(screen.getByText('Ваше місце')).toBeOnTheScreen());
     expect(screen.getByText(/^Варна · /)).toBeOnTheScreen();
-    expect(screen.queryByText('Показати водойми поруч')).toBeNull();
+    expect(screen.queryByText('Дозвольте доступ до геопозиції')).toBeNull();
   }, 20_000);
 
   it('says where you are by coordinates rather than naming the wrong town', async () => {
@@ -171,7 +268,7 @@ describe('TodayScreen and location', () => {
     await renderWithProviders(<TodayScreen />);
 
     await waitFor(() => expect(screen.getByText('Старе русло')).toBeOnTheScreen());
-    expect(screen.queryByText('Показати водойми поруч')).toBeNull();
+    expect(screen.queryByText('Дозвольте доступ до геопозиції')).toBeNull();
     expect(screen.getByText(/^Вишгород · /)).toBeOnTheScreen();
   }, 20_000);
 });
@@ -261,7 +358,7 @@ describe('ProfileScreen', () => {
     expect(usePreferences.getState().language).toBe('en');
   }, 20_000);
 
-  it('offers all three languages, each named in itself', async () => {
+  it('offers all four languages, each named in itself', async () => {
     serveForecast();
     await renderWithProviders(<ProfileScreen />);
 
@@ -270,7 +367,8 @@ describe('ProfileScreen', () => {
     );
     expect(screen.getByRole('radio', { name: 'English' })).toBeOnTheScreen();
     expect(screen.getByRole('radio', { name: 'Български' })).toBeOnTheScreen();
-    expect(screen.getAllByRole('radio')).toHaveLength(3);
+    expect(screen.getByRole('radio', { name: 'Русский' })).toBeOnTheScreen();
+    expect(screen.getAllByRole('radio')).toHaveLength(4);
   }, 20_000);
 
   it('switches to Bulgarian', async () => {
@@ -280,6 +378,15 @@ describe('ProfileScreen', () => {
 
     await fireEvent.press(screen.getByRole('radio', { name: 'Български' }));
     expect(usePreferences.getState().language).toBe('bg');
+  }, 20_000);
+
+  it('switches to Russian', async () => {
+    serveForecast();
+    await renderWithProviders(<ProfileScreen />);
+    await waitFor(() => expect(screen.getByRole('radio', { name: 'Русский' })).toBeOnTheScreen());
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Русский' }));
+    expect(usePreferences.getState().language).toBe('ru');
   }, 20_000);
 });
 

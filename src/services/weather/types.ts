@@ -22,4 +22,6 @@ export type Forecast = {
   utcOffsetSeconds: number;
   /** Seven days, today first. */
   days: DailyForecast[];
+  /** Sea within reach of the spot; `undefined` until it could be checked. */
+  seaNearby?: boolean | undefined;
 };

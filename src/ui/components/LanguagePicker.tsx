@@ -13,14 +13,20 @@ export type LanguagePickerProps = {
   onSelect: (language: Language) => void;
 };
 
-/** Two equal chips; the active one is filled sage, per DESIGN_SPEC §8. */
+/**
+ * Equal chips, two to a row so four language names fit a phone; the active one
+ * is filled sage, per DESIGN_SPEC §8.
+ */
 export function LanguagePicker({
   selected,
   labels,
   onSelect,
 }: LanguagePickerProps): React.JSX.Element {
   return (
-    <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: space.md }}>
+    <View
+      accessibilityRole="radiogroup"
+      style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}
+    >
       {SUPPORTED_LANGUAGES.map((language) => {
         const active = language === selected;
         return (
@@ -31,7 +37,8 @@ export function LanguagePicker({
             accessibilityLabel={labels[language]}
             onPress={() => onSelect(language)}
             style={{
-              flex: 1,
+              flexGrow: 1,
+              flexBasis: '40%',
               minHeight: MIN_TOUCH_SIZE,
               alignItems: 'center',
               justifyContent: 'center',

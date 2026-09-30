@@ -1,8 +1,11 @@
-# Cold start: the index and all eight factors are on screen without any prompt.
+# Cold start: the location dialog explains itself, and the index is there behind it.
 appId: com.kliuye.app
 ---
 - launchApp:
     clearState: true
+# The location explanation is an in-app dialog; the system prompt only follows a tap.
+- assertVisible: 'Дозвольте доступ до геопозиції'
+- tapOn: 'Пізніше'
 - assertVisible: 'Індекс кльову'
 - assertVisible: 'Найкраще вікно.*'
 - assertVisible: 'З чого складається'
