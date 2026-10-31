@@ -1,6 +1,6 @@
 import { Image, View } from 'react-native';
 
-import { Icon, Text, colors, radius, space } from '@/ui';
+import { Icon, Text, radius, space, useColors } from '@/ui';
 
 export type AvatarProps = {
   uri: string;
@@ -14,6 +14,7 @@ const BADGE = 24;
 
 /** The angler's photo, or their initials on the accent when there is none. */
 export function Avatar({ uri, initials, size, editable = false }: AvatarProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View style={{ width: size, height: size }}>
       {uri === '' ? (
@@ -46,7 +47,7 @@ export function Avatar({ uri, initials, size, editable = false }: AvatarProps): 
             width: BADGE,
             height: BADGE,
             borderRadius: radius.pill,
-            backgroundColor: colors.text,
+            backgroundColor: colors.ink,
             borderWidth: 2,
             borderColor: colors.bg,
             alignItems: 'center',

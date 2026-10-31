@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 
-import { reverseGeocode } from '../places';
+import { describePlace, reverseGeocode } from '../places';
 import type * as PlacesModule from '../places';
 import { storageKeys } from '../storage';
 import type * as StorageModule from '../storage';
@@ -26,6 +26,53 @@ async function nextSession(stored: unknown) {
   location.reverseGeocodeAsync.mockRejectedValue(new Error('no connection'));
   return require('../places') as typeof PlacesModule;
 }
+
+describe('describePlace', () => {
+  it('gives the settlement, and the region it lies in', async () => {
+    mocked.reverseGeocodeAsync.mockResolvedValue([
+      { city: 'Вишгород', subregion: 'Вишгородський район', region: 'Київська область' },
+    ] as never);
+    await expect(describePlace({ latitude: 50.58, longitude: 30.49 })).resolves.toEqual({
+      name: 'Вишгород',
+      area: 'Київська область',
+    });
+  });
+
+  it('names a place with no settlement by its district, over the region', async () => {
+    mocked.reverseGeocodeAsync.mockResolvedValue([
+      { subregion: 'Вишгородський район', region: 'Київська область' },
+    ] as never);
+    await expect(describePlace({ latitude: 50.7, longitude: 30.4 })).resolves.toEqual({
+      name: 'Вишгородський район',
+      area: 'Київська область',
+    });
+  });
+
+  it('reads the region it kept, and skips anything malformed on disk', async () => {
+    const places = await nextSession([
+      ['43.21,27.91', { name: 'Варна', area: 'Варненська область' }],
+      ['1.00,1.00', 42],
+      ['bad'],
+      'not an entry',
+      [7, 'Варна'],
+    ]);
+    await expect(places.describePlace(VARNA)).resolves.toEqual({
+      name: 'Варна',
+      area: 'Варненська область',
+    });
+    await expect(places.describePlace({ latitude: 1, longitude: 1 })).resolves.toEqual({});
+  });
+
+  it('starts afresh when the stored names are not a list', async () => {
+    const places = await nextSession({ broken: true });
+    await expect(places.describePlace(VARNA)).resolves.toEqual({});
+  });
+
+  it('reads names an earlier version kept as plain strings', async () => {
+    const places = await nextSession([['43.21,27.91', 'Варна']]);
+    await expect(places.describePlace(VARNA)).resolves.toEqual({ name: 'Варна' });
+  });
+});
 
 describe('reverseGeocode', () => {
   it('answers with the settlement the geocoder found', async () => {

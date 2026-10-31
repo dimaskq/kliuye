@@ -1,4 +1,5 @@
 import type { SunTimes, WaterTemperature, WeatherSnapshot } from '@/domain/bite-index';
+import { isMeaningfulTide, tideDay } from '@/domain/tides';
 import { estimateWaterTemperature, measuredWaterTemperature } from '@/domain/water-temperature';
 
 import { AppError } from '../errors';
@@ -88,6 +89,14 @@ function snapshotAt(
   };
 }
 
+/** The day's tide, kept only where it moves enough to matter. */
+function tideAt(marine: MarineResponse | undefined, base: number) {
+  const level = marine?.hourly.sea_level_height_msl;
+  if (level === undefined) return undefined;
+  const tide = tideDay(level.slice(base - 1, base + HOURS_PER_DAY + 1));
+  return isMeaningfulTide(tide) ? tide : undefined;
+}
+
 function dayAt(
   response: ForecastResponse,
   marine: MarineResponse | undefined,
@@ -108,6 +117,7 @@ function dayAt(
     date,
     month: monthOf(date),
     sun: sunTimesFor(response, dayIndex),
+    tide: tideAt(marine, base),
     hourlyWeather: Array.from({ length: HOURS_PER_DAY }, (_, hour) =>
       snapshotAt(response, base + hour, night, waterAt(marine, base + hour, estimated), trend),
     ),
@@ -130,6 +140,7 @@ export function toForecast(
     fetchedAt,
     timezone: response.timezone,
     utcOffsetSeconds: response.utc_offset_seconds,
+    elevationM: response.elevation,
     days: Array.from({ length: FORECAST_DAYS }, (_, dayOffset) =>
       dayAt(response, marine, dayOffset, estimated),
     ),

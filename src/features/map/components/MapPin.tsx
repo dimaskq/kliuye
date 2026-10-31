@@ -1,6 +1,6 @@
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
-import { fontFamily, shadows } from '@/ui';
+import { fontFamily, shadows, useColors } from '@/ui';
 
 import { PIN, pinStyle } from './pinShape';
 
@@ -14,7 +14,8 @@ export type MapPinProps = {
 
 /** The teardrop pin; its tip sits on the coordinate it marks. */
 export function MapPin({ value, selected, draggable = false }: MapPinProps): React.JSX.Element {
-  const style = pinStyle(selected, draggable);
+  const colors = useColors();
+  const style = pinStyle(selected, draggable, colors);
 
   return (
     <Svg

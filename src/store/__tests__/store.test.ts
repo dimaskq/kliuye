@@ -18,6 +18,41 @@ beforeEach(() => {
 });
 
 describe('usePreferences', () => {
+  it('shows the first-launch tour on a fresh install, but not to someone upgrading', () => {
+    const { merge } = usePreferences.persist.getOptions();
+    const current = usePreferences.getState();
+    expect(merge?.(undefined, current).onboardingDone).toBe(false);
+    expect(merge?.({ language: 'en' }, current).onboardingDone).toBe(true);
+    expect(merge?.({ onboardingDone: false }, current).onboardingDone).toBe(false);
+  });
+
+  it('keeps the chosen map view, and falls back to the plain map for one it does not know', () => {
+    const { merge } = usePreferences.persist.getOptions();
+    const current = usePreferences.getState();
+    expect(merge?.({ mapLayer: 'dark' }, current).mapLayer).toBe('dark');
+    expect(merge?.({ mapLayer: 'satellite' } as never, current).mapLayer).toBe('standard');
+  });
+
+  it('follows the phone unless a theme was picked, and forgets one it does not know', () => {
+    const { merge } = usePreferences.persist.getOptions();
+    const current = usePreferences.getState();
+    expect(merge?.(undefined, current).themeMode).toBe('system');
+    expect(merge?.({ themeMode: 'dark' }, current).themeMode).toBe('dark');
+    expect(merge?.({ themeMode: 'sepia' } as never, current).themeMode).toBe('system');
+  });
+
+  it('shows every tour again on request', () => {
+    usePreferences.setState({ onboardingDone: true, explainerSeen: true, featureTourDone: true });
+    usePreferences.getState().replayTours();
+    const { onboardingDone, explainerSeen, featureTourDone } = usePreferences.getState();
+    expect([onboardingDone, explainerSeen, featureTourDone]).toEqual([false, false, false]);
+  });
+
+  it('remembers the tour once it is finished', () => {
+    usePreferences.getState().finishOnboarding();
+    expect(usePreferences.getState().onboardingDone).toBe(true);
+  });
+
   it('starts in the device language and metric, with only the offline map on', () => {
     const state = usePreferences.getState();
     expect(state.language).toBe('uk');

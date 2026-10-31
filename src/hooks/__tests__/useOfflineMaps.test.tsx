@@ -1,8 +1,10 @@
 import { onlineManager } from '@tanstack/react-query';
 import { File } from 'expo-file-system';
+import { HttpResponse, http } from 'msw';
 
-import { clearTileCache } from '@/services/tiles';
+import { TILEJSON_URL, clearTileCache } from '@/services/tiles';
 import { usePreferences } from '@/store';
+import { server } from '@tests/msw/server';
 import { act, renderHook, waitFor } from '@tests/render';
 
 import { useTileCache, useTilePrefetch } from '../useOfflineMaps';
@@ -11,7 +13,15 @@ const KYIV = [{ latitude: 50.45, longitude: 30.52 }];
 const download = File.downloadFileAsync as jest.Mock;
 const PREFETCH_DELAY_MS = 2000;
 
+beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+afterAll(() => server.close());
+
 beforeEach(async () => {
+  server.use(
+    http.get(TILEJSON_URL, () =>
+      HttpResponse.json({ tiles: ['https://tiles.example.test/{z}/{x}/{y}.pbf'] }),
+    ),
+  );
   onlineManager.setOnline(true);
   usePreferences.getState().setToggle('offlineMaps', true);
   await clearTileCache();
@@ -19,6 +29,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  server.resetHandlers();
   onlineManager.setOnline(true);
 });
 

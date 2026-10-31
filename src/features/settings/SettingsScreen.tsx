@@ -16,6 +16,7 @@ import {
 } from '@/ui';
 
 import { OfflineMapCard } from './OfflineMapCard';
+import { ThemeSection } from './ThemeSection';
 
 /** The gear on Today: the same rows as the profile tab, on their own screen. */
 export function SettingsScreen(): React.JSX.Element {
@@ -25,6 +26,7 @@ export function SettingsScreen(): React.JSX.Element {
   const setLanguage = usePreferences((state) => state.setLanguage);
   const labels = useLanguageLabels();
   const settings = useSettingsRows();
+  const replayTours = usePreferences((state) => state.replayTours);
 
   return (
     <Screen>
@@ -37,10 +39,19 @@ export function SettingsScreen(): React.JSX.Element {
         <SectionHeader title={t('profile.language')} />
         <LanguagePicker selected={language} labels={labels} onSelect={setLanguage} />
       </View>
+      <ThemeSection />
       <Card
         radiusToken="tipCard"
         style={{ paddingVertical: space.sm, paddingHorizontal: space.xs }}
       >
+        <NavRow
+          label={t('settings.replayTours')}
+          hint={t('settings.replayToursHint')}
+          onPress={() => {
+            replayTours();
+            router.navigate('/');
+          }}
+        />
         <NavRow
           label={t('about.title')}
           hint={t('profile.aboutHint')}

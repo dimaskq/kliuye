@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { Card, Text, colors, space } from '@/ui';
+import { Card, Text, space, useColors } from '@/ui';
 
 export type Stat = {
   id: string;
@@ -10,6 +10,7 @@ export type Stat = {
 
 /** Three equal tiles: average index, record weight, number of waters. */
 export function StatTiles({ stats }: { stats: readonly Stat[] }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View style={{ flexDirection: 'row', gap: space.lg }}>
       {stats.map((stat) => (

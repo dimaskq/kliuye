@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import type { Tip } from '@/domain/tips';
 import { useCurrentForecast } from '@/hooks';
 import { errorMessageKey } from '@/services/errors';
-import { Screen, StatusCard, Text, colors } from '@/ui';
+import { Screen, StatusCard, Text, useColors } from '@/ui';
 
 import { TipRow } from './components';
 import { TipsSkeleton } from './TipsSkeleton';
@@ -34,6 +34,7 @@ function TipList({ tips }: { tips: readonly Tip[] }): React.JSX.Element {
 
 /** Advice derived from the live factors, ordered by how much each one is saying. */
 export function TipsScreen(): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const { model, isLoading, isRefreshing, error, refetch } = useCurrentForecast();
 

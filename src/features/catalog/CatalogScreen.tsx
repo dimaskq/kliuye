@@ -22,9 +22,9 @@ import {
   Tag,
   Text,
   Toggle,
-  colors,
   space,
   textVariants,
+  useColors,
 } from '@/ui';
 import type { TagTone, TextVariant } from '@/ui';
 
@@ -93,6 +93,7 @@ function ControlSection({
   on: boolean;
   setOn: (value: boolean) => void;
 }): React.JSX.Element {
+  const colors = useColors();
   return (
     <>
       <Row title="controls">

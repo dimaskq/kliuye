@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { colors, space } from '../tokens';
+import { useColors } from '../theme';
+import { space } from '../tokens';
 
 import { Button } from './Button';
 import { Card } from './Card';
@@ -20,6 +21,7 @@ export function StatusCard({
   actionLabel,
   onAction,
 }: StatusCardProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Card elevated style={{ padding: space.gap }}>
       <View style={{ gap: space.md }}>

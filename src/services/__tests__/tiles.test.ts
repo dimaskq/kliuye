@@ -1,8 +1,12 @@
 import { File } from 'expo-file-system';
+import { HttpResponse, http } from 'msw';
+
+import { server } from '@tests/msw/server';
 
 import {
   TILE_MAX_ZOOM,
   TILE_MIN_ZOOM,
+  TILEJSON_URL,
   cacheTiles,
   clearTileCache,
   tileCachePath,
@@ -16,10 +20,16 @@ import {
 const KYIV = { latitude: 50.45, longitude: 30.52 };
 const download = File.downloadFileAsync as jest.Mock;
 
+const TEMPLATE = 'https://tiles.openfreemap.org/planet/20261011_080001_pt/{z}/{x}/{y}.pbf';
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 beforeEach(async () => {
+  server.use(http.get(TILEJSON_URL, () => HttpResponse.json({ tiles: [TEMPLATE] })));
   await clearTileCache();
   download.mockClear();
 });
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe('tile geometry', () => {
   it('puts the whole world in one tile at zoom 0', () => {
@@ -42,7 +52,9 @@ describe('tile geometry', () => {
   });
 
   it('fills the url template', () => {
-    expect(tileUrl({ z: 9, x: 1, y: 2 })).toBe('https://tile.openstreetmap.org/9/1/2.png');
+    expect(tileUrl('https://tiles.example.org/{z}/{x}/{y}.pbf', { z: 9, x: 1, y: 2 })).toBe(
+      'https://tiles.example.org/9/1/2.pbf',
+    );
   });
 });
 
@@ -73,10 +85,10 @@ describe('tilesAround', () => {
 });
 
 describe('the tile cache', () => {
-  it('downloads what is missing and counts it', async () => {
+  it('downloads what is missing and counts it, with the style to draw it', async () => {
     const tiles = tilesAround(KYIV, 12, 8);
     await expect(cacheTiles(tiles)).resolves.toBe(8);
-    expect(download).toHaveBeenCalledTimes(8);
+    expect(download).toHaveBeenCalledTimes(8 + 1);
   });
 
   it('never fetches a tile it already has', async () => {
@@ -98,11 +110,14 @@ describe('the tile cache', () => {
 
   it('drops the oldest tiles once the cache outgrows its limit', async () => {
     await cacheTiles(tilesAround(KYIV, 12, 10), undefined, 4 * 1024);
-    expect(await tileCacheSize()).toBeLessThanOrEqual(4 * 1024);
+    /* The limit is on tiles; the saved style is never trimmed. */
+    expect(await tileCacheSize()).toBeLessThanOrEqual(4 * 1024 + 1024);
   });
 
   it('treats a failed download as a blank square, not an error', async () => {
-    download.mockRejectedValueOnce(new Error('no signal'));
+    const save = download.getMockImplementation();
+    /* The style comes first; the second request is the first tile. */
+    download.mockImplementationOnce(save!).mockRejectedValueOnce(new Error('no signal'));
     await expect(cacheTiles(tilesAround(KYIV, 12, 3))).resolves.toBe(2);
   });
 
@@ -113,6 +128,28 @@ describe('the tile cache', () => {
   });
 
   it('hands the map a directory to read tiles from', () => {
-    expect(tileCachePath()).toContain('map-tiles');
+    expect(tileCachePath()).toContain('map-vector');
+  });
+
+  it('downloads only from OpenFreeMap, never from OpenStreetMap tile servers', async () => {
+    await cacheTiles(tilesAround(KYIV, 12, 3));
+    const urls = download.mock.calls.map(([url]) => String(url));
+    expect(urls).toContain('https://tiles.openfreemap.org/styles/liberty');
+    expect(urls.every((url) => url.startsWith('https://tiles.openfreemap.org/'))).toBe(true);
+  });
+
+  it('names the app in every download, as the tile provider asks', async () => {
+    await cacheTiles(tilesAround(KYIV, 12, 2));
+    for (const [, , options] of download.mock.calls) {
+      expect((options as { headers: Record<string, string> }).headers['User-Agent']).toMatch(
+        /Kliuye/,
+      );
+    }
+  });
+
+  it('saves nothing when the tile server cannot be asked which tiles are current', async () => {
+    server.use(http.get(TILEJSON_URL, () => new HttpResponse(null, { status: 404 })));
+    await expect(cacheTiles(tilesAround(KYIV, 12, 3))).resolves.toBe(0);
+    expect(download).not.toHaveBeenCalled();
   });
 });

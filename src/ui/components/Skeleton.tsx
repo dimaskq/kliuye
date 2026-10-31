@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { colors, radius } from '../tokens';
+import { useColors } from '../theme';
+import { radius } from '../tokens';
 
 export type SkeletonProps = {
   height: number;
@@ -14,6 +15,7 @@ export function Skeleton({
   width = '100%',
   radiusToken = 'lg',
 }: SkeletonProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       accessibilityElementsHidden

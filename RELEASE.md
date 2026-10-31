@@ -40,7 +40,9 @@ tiles, so there is no Google Cloud project and no billing account to keep.
 - `version` in `app.config.ts` is semantic and changed by hand in the release PR.
 - `buildNumber` / `versionCode` are auto-incremented by EAS
   (`appVersionSource: "remote"`, `autoIncrement: true` in the `production`
-  profile).
+  profile). The local Gradle build used so far does not do this: raise
+  `android.versionCode` and `ios.buildNumber` in `app.config.ts` by hand (see
+  [`store/RELEASE_DAY.md`](store/RELEASE_DAY.md)).
 - Every release gets a git tag `v1.2.3` and a `CHANGELOG.md` entry generated
   from Conventional Commits.
 
@@ -91,7 +93,7 @@ start to finish. The minimum that must not be skipped:
 - [ ] `fontScale` 200% / the largest Dynamic Type — nothing clipped.
 - [ ] First launch in airplane mode + location denied — the app works.
 - [ ] Offline map: open the Map with a connection, wait a few seconds, switch on
-      airplane mode — the map stays drawn, with the OpenStreetMap attribution.
+      airplane mode — the map stays drawn, in the same style as online.
       Settings show the cache size, and "Clear" frees it.
 - [ ] `npx expo prebuild --platform android --clean` → check the final
       `AndroidManifest.xml` (or `aapt2 dump badging` on the APK): only
@@ -117,8 +119,8 @@ start to finish. The minimum that must not be skipped:
       declared:
   - Apple App Privacy: _Coarse Location_ → **Data Not Linked to You**, purpose
     _App Functionality_; the same in `ios.privacyManifests`.
-  - Offline map tiles come from tile.openstreetmap.org, so OSM also sees the
-    area's coordinates (to tile precision, with no identifier). That is the same
+  - Offline map tiles and the water check come from OpenFreeMap, which also sees
+    the area's coordinates (to tile precision, with no identifier). That is the same
     _Coarse Location → App Functionality_ category — no extra row in the forms,
     but mention it in the App Review Notes next to Open-Meteo.
   - Play Data safety: _Approximate location_ and _In-app search history_ →
@@ -151,16 +153,23 @@ start to finish. The minimum that must not be skipped:
 - [ ] App Review Notes: "No login needed, there are no accounts. Location
       permission is optional — the app works fully without it: pick a place on
       the map or search for a town. Weather data: Open-Meteo, a public API; map
-      tiles for offline mode: OpenStreetMap. The app works fully offline: it
+      tiles, also for offline mode: OpenFreeMap. The app works fully offline: it
       shows the saved forecast with its timestamp and the saved map."
 
 ## 6. Sentry
 
-**Off** in v1: the dependency is not installed and nothing is collected, so both
-privacy forms honestly say "no data collected". If it is ever turned on — only
-with the user's explicit consent (a separate switch, off by default), and then
-both forms, and the privacy policy, have to be rewritten. Do not ship that in
-the same release as other changes.
+**Opt-in** since 1.3.0: a "Crash reports" switch in Settings, **off by
+default**. Until it is on, the SDK is never started and nothing is sent. Once on,
+a report carries the error, the screen, the app version and the phone model —
+no user, no IP, and every URL loses its query, so no coordinates. No tracing,
+replays or screenshots. Sentry organisation `dem-kravchenko`, EU region.
+
+The privacy policy, the Play Data safety form and the iOS privacy manifest say
+so. Ship changes to what is collected in a release of their own.
+
+The step-by-step plan for turning it on that way — why Sentry rather than
+Crashlytics, the consent switch, what to scrub, the form answers — is in
+[`store/SENTRY.md`](store/SENTRY.md).
 
 ## 7. After the release
 

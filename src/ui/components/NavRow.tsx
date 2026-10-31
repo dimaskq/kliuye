@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 
-import { colors, iconSize, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { iconSize, space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Icon } from './Icon';
 import { Text } from './Text';
@@ -13,6 +14,7 @@ export type NavRowProps = {
 
 /** A settings row that navigates rather than toggles. */
 export function NavRow({ label, hint, onPress }: NavRowProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="link"

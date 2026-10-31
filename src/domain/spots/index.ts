@@ -106,22 +106,46 @@ export function currentLocationSpot(origin: LatLng, city?: string | undefined): 
 
 /** A point the user picked on the map or found by searching for a settlement. */
 export type CustomPoint = LatLng & {
-  /** Settlement name, once one is known; empty until then. */
+  /** The angler's own name for it, or the settlement; empty until one is known. */
   label: string;
+  /** The district or region it lies in — "Київська область" — when the geocoder knows. */
+  area?: string | undefined;
 };
 
 export const CUSTOM_SPOT_ID = 'custom';
 
+/**
+ * How a picked point reads in the header: its own name over the region it lies
+ * in; with no name, the region itself; with neither, "a point on the map" —
+ * never a made-up place.
+ */
+function customNames(point: CustomPoint, coordinates: LatLng) {
+  const { key, params } = place(coordinates, point.label);
+  const area = point.area ?? '';
+  const withArea = { ...params, area };
+  if (key === 'named') {
+    return {
+      nameKey: 'spots.custom.named',
+      regionKey: area === '' ? 'spots.custom.region' : 'spots.custom.area',
+      params: withArea,
+    };
+  }
+  if (area !== '') {
+    return { nameKey: 'spots.custom.area', regionKey: 'spots.custom.region', params: withArea };
+  }
+  return { nameKey: 'spots.custom.unnamed', regionKey: 'spots.custom.region', params: withArea };
+}
+
 export function customSpot(point: CustomPoint): Spot {
   const coordinates = { latitude: point.latitude, longitude: point.longitude };
-  const { key, params } = place(coordinates, point.label);
+  const { nameKey, regionKey, params } = customNames(point, coordinates);
   return {
     id: CUSTOM_SPOT_ID,
-    nameKey: `spots.custom.${key}`,
+    nameKey,
     nameParams: params,
     metaKey: 'spots.custom.meta',
     metaParams: params,
-    regionKey: 'spots.custom.region',
+    regionKey,
     regionParams: params,
     coordinates,
     /* Neither a searched settlement nor a tap tells us which bank we would fish. */

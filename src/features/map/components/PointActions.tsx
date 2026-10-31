@@ -1,24 +1,27 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
-import { Icon, Text, colors, iconSize, radius, space, MIN_TOUCH_SIZE } from '@/ui';
-import type { IconName } from '@/ui';
+import { Icon, Text, iconSize, radius, space, MIN_TOUCH_SIZE, useColors } from '@/ui';
+import type { Colors, IconName } from '@/ui';
 
 /** Leaflet draws its panes up to z-index 1000 on the web. */
 export const OVERLAY_Z = 1001;
 
 type Tone = 'ink' | 'plain' | 'blaze';
 
-const TONE: Record<Tone, { background: string; foreground: string }> = {
-  ink: { background: colors.text, foreground: colors.lure },
-  plain: { background: colors.bg, foreground: colors.text },
-  blaze: { background: colors.accent, foreground: colors.onAccent },
-};
+function toneOf(colors: Colors, tone: Tone): { background: string; foreground: string } {
+  return {
+    ink: { background: colors.ink, foreground: colors.lure },
+    plain: { background: colors.bg, foreground: colors.text },
+    blaze: { background: colors.accent, foreground: colors.onAccent },
+  }[tone];
+}
 
 type ActionProps = { icon: IconName; label: string; tone: Tone; onPress: () => void };
 
 function Action({ icon, label, tone, onPress }: ActionProps): React.JSX.Element {
-  const { background, foreground } = TONE[tone];
+  const colors = useColors();
+  const { background, foreground } = toneOf(colors, tone);
   return (
     <Pressable
       accessibilityRole="button"

@@ -120,3 +120,14 @@ describe('housekeeping', () => {
     expect(() => forgetFiles(['file:///documents/catches/gone.jpg'])).not.toThrow();
   });
 });
+
+describe('persistableImage on a phone', () => {
+  it('keeps the address it is given: the file already lives in the app folder', async () => {
+    const { persistableImage } = jest.requireActual<{
+      persistableImage: (uri: string, maxSide: number) => Promise<string>;
+    }>('../stillImage');
+    await expect(persistableImage('file:///documents/catches/a.jpg', 1280)).resolves.toBe(
+      'file:///documents/catches/a.jpg',
+    );
+  });
+});

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import type { Spot } from '@/domain/spots';
 import { FORECAST_CACHE_TIME_MS, FORECAST_STALE_TIME_MS, forecastQueryKey } from '@/services/query';
@@ -6,6 +7,7 @@ import { fetchForecast } from '@/services/weather';
 import type { Forecast } from '@/services/weather';
 
 import { useIsOnline } from './useIsOnline';
+import { useWaterAround } from './useOnWater';
 
 export type ForecastState = {
   forecast: Forecast | undefined;
@@ -26,8 +28,15 @@ export function useForecast(spot: Spot): ForecastState {
     gcTime: FORECAST_CACHE_TIME_MS,
   });
 
+  /* One object per answer: the bite model caches its work per forecast object. */
+  const fresh = useWaterAround(spot)?.fresh;
+  const forecast = useMemo(
+    () => (query.data === undefined ? undefined : { ...query.data, freshwaterNearby: fresh }),
+    [fresh, query.data],
+  );
+
   return {
-    forecast: query.data,
+    forecast,
     isLoading: query.isPending,
     isRefreshing: query.isFetching && !query.isPending,
     error: query.isError ? query.error : undefined,

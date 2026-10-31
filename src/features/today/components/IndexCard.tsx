@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { Card, Icon, ScoreRing, Text, colors, iconSize, radius, sizes, space } from '@/ui';
+import { Card, Icon, ScoreRing, Text, iconSize, radius, sizes, space, useColors } from '@/ui';
 
 export type IndexCardProps = {
   value: number;
@@ -25,6 +25,7 @@ const RIPPLES = [
 const RING_CENTER_Y = 28 + sizes.ring / 2;
 
 function Ripples(): React.JSX.Element {
+  const colors = useColors();
   return (
     <>
       {RIPPLES.map(({ size, opacity }) => (
@@ -49,6 +50,7 @@ function Ripples(): React.JSX.Element {
 }
 
 function WindowPill({ label }: { label: string }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{
@@ -62,8 +64,8 @@ function WindowPill({ label }: { label: string }): React.JSX.Element {
         paddingHorizontal: 18,
       }}
     >
-      <Icon name="clock" size={iconSize.header} color={colors.text} />
-      <Text variant="label" color={colors.text}>
+      <Icon name="clock" size={iconSize.header} color={colors.onAccent} />
+      <Text variant="label" color={colors.onAccent}>
         {label}
       </Text>
     </View>
@@ -79,6 +81,7 @@ export function IndexCard({
   windowLabel,
   accessibilityLabel,
 }: IndexCardProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Card
       tone="dark"
@@ -93,7 +96,7 @@ export function IndexCard({
       <Ripples />
       <View accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
         <ScoreRing value={value} trackColor={colors.onDarkTrack}>
-          <Text variant="display" color={colors.bg}>
+          <Text variant="display" color={colors.onDeep}>
             {value}
           </Text>
           <Text variant="kickerWide" color={colors.onDarkMuted} style={{ marginTop: space.xs }}>
@@ -101,7 +104,7 @@ export function IndexCard({
           </Text>
         </ScoreRing>
       </View>
-      <Text variant="h2" align="center" color={colors.bg} style={{ marginTop: space.section }}>
+      <Text variant="h2" align="center" color={colors.onDeep} style={{ marginTop: space.section }}>
         {verdictWord}
       </Text>
       <Text

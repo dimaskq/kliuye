@@ -7,12 +7,13 @@ import { byNewest, catchStats, filesOf } from '@/domain/diary';
 import type { Catch } from '@/domain/diary';
 import { pruneOrphans } from '@/services/media';
 import { useDiary } from '@/store';
-import { Button, Screen, StatusCard, Text, colors, space } from '@/ui';
+import { Button, Screen, StatusCard, Text, space, useColors } from '@/ui';
 
 import { CatchRow } from './components';
 import { useCatchLabels } from './useCatchLabels';
 
 function Summary({ catches }: { catches: readonly Catch[] }): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const { fish, trips, recordKg } = catchStats(catches);
   return (
@@ -28,6 +29,7 @@ function Summary({ catches }: { catches: readonly Catch[] }): React.JSX.Element 
 
 /** The angler's own record of what they caught. Local only, never uploaded. */
 export function DiaryScreen(): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const router = useRouter();
   const catches = useDiary((state) => state.catches);

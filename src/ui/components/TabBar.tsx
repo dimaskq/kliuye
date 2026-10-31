@@ -1,18 +1,12 @@
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  colors,
-  iconSize,
-  radius,
-  sizes,
-  space,
-  MIN_TOUCH_SIZE,
-  TAB_ICON_STROKE_WIDTH,
-} from '../tokens';
+import { useColors } from '../theme';
+import { iconSize, radius, sizes, space, MIN_TOUCH_SIZE, TAB_ICON_STROKE_WIDTH } from '../tokens';
 
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
+import { SpotlightTarget } from './SpotlightTarget';
 import { Text } from './Text';
 
 export type TabItem = {
@@ -24,6 +18,7 @@ export type TabItem = {
 };
 
 function Tab({ item }: { item: TabItem }): React.JSX.Element {
+  const colors = useColors();
   const tint = item.selected ? colors.text : colors.textAlpha[52];
   return (
     <Pressable
@@ -32,7 +27,6 @@ function Tab({ item }: { item: TabItem }): React.JSX.Element {
       accessibilityState={{ selected: item.selected }}
       onPress={item.onPress}
       style={{
-        flex: 1,
         alignItems: 'center',
         gap: space.xs,
         minHeight: MIN_TOUCH_SIZE,
@@ -68,6 +62,7 @@ function Tab({ item }: { item: TabItem }): React.JSX.Element {
 
 /** Equal-width tabs; the active one wears an accent pill behind its icon. */
 export function TabBar({ items }: { items: readonly TabItem[] }): React.JSX.Element {
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -83,7 +78,10 @@ export function TabBar({ items }: { items: readonly TabItem[] }): React.JSX.Elem
       }}
     >
       {items.map((item) => (
-        <Tab key={item.key} item={item} />
+        /* Each tab can be pointed at by a tour, as `tab.<key>`. */
+        <SpotlightTarget key={item.key} id={`tab.${item.key}`} style={{ flex: 1 }}>
+          <Tab item={item} />
+        </SpotlightTarget>
       ))}
     </View>
   );

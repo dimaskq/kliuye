@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 
 import type { CustomPoint } from '@/domain/spots';
-import { IconButton, Text, colors, radius, space, MIN_TOUCH_SIZE } from '@/ui';
+import { IconButton, Text, radius, space, MIN_TOUCH_SIZE, useColors } from '@/ui';
 
 export type PointRowProps = {
   point: CustomPoint;
@@ -24,6 +24,7 @@ export function PointRow({
   onPress,
   onToggleFavourite,
 }: PointRowProps): React.JSX.Element {
+  const colors = useColors();
   const name = point.label === '' ? fallbackName : point.label;
 
   return (

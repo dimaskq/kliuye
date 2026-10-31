@@ -11,11 +11,15 @@ export type ScoredSpot = SpotWithDistance & {
   value: number | undefined;
 };
 
+/** What the water check said about one spot — the only one it is asked about. */
+export type FreshwaterAnswer = { spotId: string; freshwaterNearby: boolean | undefined };
+
 /** One cached forecast per water, so each pin shows that water's own index. */
 export function useSpotScores(
   spots: readonly SpotWithDistance[],
   species: SpeciesId,
   hour: number,
+  water?: FreshwaterAnswer,
 ): ScoredSpot[] {
   const results = useQueries({
     queries: spots.map((spot) => ({
@@ -28,7 +32,11 @@ export function useSpotScores(
   });
 
   return spots.map((spot, index) => {
-    const forecast = results[index]?.data;
+    const fetched = results[index]?.data;
+    const forecast =
+      fetched === undefined || water?.spotId !== spot.id
+        ? fetched
+        : { ...fetched, freshwaterNearby: water.freshwaterNearby };
     const value = forecast === undefined ? undefined : scoreValueAt(forecast, spot, species, hour);
     return { ...spot, value };
   });

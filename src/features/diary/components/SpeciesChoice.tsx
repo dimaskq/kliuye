@@ -1,6 +1,7 @@
 import { ScrollView, View } from 'react-native';
 
 import type { SpeciesId } from '@/domain/bite-index';
+import { SpeciesArt } from '@/features/species';
 import { Pill, SectionHeader, space } from '@/ui';
 
 export type SpeciesChoiceGroup = {
@@ -38,6 +39,7 @@ export function SpeciesChoice({
                 key={id}
                 label={nameOf(id)}
                 selected={id === selected}
+                leading={<SpeciesArt species={id} width={34} />}
                 accessibilityLabel={nameOf(id)}
                 onPress={() => onSelect(id)}
               />

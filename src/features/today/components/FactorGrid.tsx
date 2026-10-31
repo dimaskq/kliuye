@@ -1,17 +1,21 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Card, Icon, Text, colors, iconSize, space } from '@/ui';
+import { Card, Icon, Text, iconSize, space, useColors } from '@/ui';
+import type { Colors } from '@/ui';
 
 import type { FactorCardModel, FactorTone } from '../factorCards';
 
-const NOTE_COLOR: Record<FactorTone, string> = {
-  positive: colors.accent2700,
-  attention: colors.accent700,
-  neutral: colors.textAlpha[55],
-};
+function noteColor(colors: Colors, tone: FactorTone): string {
+  return {
+    positive: colors.accent2700,
+    attention: colors.accent700,
+    neutral: colors.textAlpha[55],
+  }[tone];
+}
 
 function FactorCard({ card }: { card: FactorCardModel }): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const label = t(card.labelKey);
   const note = t(card.noteKey, card.noteParams);
@@ -32,7 +36,7 @@ function FactorCard({ card }: { card: FactorCardModel }): React.JSX.Element {
       <Text variant="factorValue" style={{ marginTop: space.sm }}>
         {card.value}
       </Text>
-      <Text variant="factorNote" color={NOTE_COLOR[card.tone]} style={{ marginTop: 3 }}>
+      <Text variant="factorNote" color={noteColor(colors, card.tone)} style={{ marginTop: 3 }}>
         {note}
       </Text>
     </Card>

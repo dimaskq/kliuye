@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { colors, iconSize, radius, space } from '../tokens';
+import { useColors } from '../theme';
+import { iconSize, radius, space } from '../tokens';
 
 import { Icon } from './Icon';
 import { Text } from './Text';
@@ -11,6 +12,7 @@ import { Text } from './Text';
  * and never asks for anything — the app keeps working without a connection.
  */
 export function OfflineBanner({ label }: { label: string }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       accessibilityRole="text"

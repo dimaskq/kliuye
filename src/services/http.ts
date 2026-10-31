@@ -1,4 +1,5 @@
 import { AppError, toAppError } from './errors';
+import { reportReachable } from './network';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const RETRY_ATTEMPTS = 1;
@@ -50,6 +51,7 @@ async function requestOnce<T>(url: string, options: RequestOptions, body: Body<T
       signal: controller.signal,
       headers: { Accept: body.accept },
     });
+    reportReachable();
     if (!response.ok) {
       throw new AppError('http', `Request failed with status ${response.status}`, response.status);
     }

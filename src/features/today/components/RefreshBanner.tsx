@@ -7,7 +7,7 @@ import Animated, {
   ReduceMotion,
 } from 'react-native-reanimated';
 
-import { Icon, Text, colors, iconSize, motion, radius, shadows, space } from '@/ui';
+import { Icon, Text, iconSize, motion, radius, shadows, space, useColors } from '@/ui';
 
 export type RefreshBannerProps = {
   phase: 'loading' | 'done';
@@ -29,6 +29,7 @@ const resize = LinearTransition.duration(motion.toastIn).reduceMotion(REDUCE);
  * glides down into view and back up out of it, never jolting the page.
  */
 export function RefreshBanner({ phase, label, failed }: RefreshBannerProps): React.JSX.Element {
+  const colors = useColors();
   const loading = phase === 'loading';
   return (
     <Animated.View
@@ -43,7 +44,7 @@ export function RefreshBanner({ phase, label, failed }: RefreshBannerProps): Rea
         alignItems: 'center',
         alignSelf: 'center',
         gap: space.md,
-        backgroundColor: failed ? colors.accent100 : colors.text,
+        backgroundColor: failed ? colors.accent100 : colors.ink,
         borderRadius: radius.pill,
         paddingVertical: space.md,
         paddingHorizontal: space.h,
@@ -65,7 +66,7 @@ export function RefreshBanner({ phase, label, failed }: RefreshBannerProps): Rea
             color={failed ? colors.accent700 : colors.lure}
           />
         )}
-        <Text variant="label" color={failed ? colors.accent800 : colors.bg}>
+        <Text variant="label" color={failed ? colors.accent800 : colors.onInk}>
           {label}
         </Text>
       </Animated.View>

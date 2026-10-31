@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 
-import { colors, radius, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { radius, space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Text } from './Text';
 
@@ -19,6 +20,7 @@ export type SegmentedProps = {
 
 /** A row of equal tabs inside a screen; the active one is filled. */
 export function Segmented({ segments, selectedId, onSelect }: SegmentedProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       accessibilityRole="tablist"

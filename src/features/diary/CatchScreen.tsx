@@ -2,12 +2,13 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { speciesOf } from '@/domain/bite-index';
-import { MAX_ATTACHMENTS, NOTE_LIMIT, PLACE_LIMIT, canShift } from '@/domain/diary';
+import { MAX_ATTACHMENTS, NOTE_LIMIT, canShift } from '@/domain/diary';
 import { useNow } from '@/hooks';
-import { Button, Screen, Text, TextField, colors, space } from '@/ui';
+import { Button, Screen, Text, TextButton, TextField, space, useColors } from '@/ui';
 
-import { DateField, FormField, MediaStrip, SpeciesChoice, TextButton } from './components';
+import { DateField, FormField, MediaStrip, SpeciesChoice } from './components';
 import type { SpeciesChoiceGroup } from './components';
+import { PlaceField } from './PlaceField';
 import { useAttachments } from './useAttachments';
 import { useCatchForm } from './useCatchForm';
 import type { CatchFormState } from './useCatchForm';
@@ -50,16 +51,7 @@ function Details({ form, set }: Pick<CatchFormState, 'form' | 'set'>): React.JSX
           onChange={(value) => set('weight', value)}
         />
       </FormField>
-      <FormField label={t('diary.placeLabel')}>
-        <TextField
-          icon="map-pin"
-          value={form.place}
-          placeholder={t('diary.placePlaceholder')}
-          accessibilityLabel={t('diary.placeLabel')}
-          maxLength={PLACE_LIMIT}
-          onChange={(value) => set('place', value)}
-        />
-      </FormField>
+      <PlaceField form={form} set={set} />
     </>
   );
 }
@@ -88,6 +80,7 @@ function addKey({ busy, full }: { busy: boolean; full: boolean }): string {
 }
 
 function MediaField({ form, set }: Pick<CatchFormState, 'form' | 'set'>): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const media = useAttachments(form.media, (value) => set('media', value));
   return (
@@ -120,7 +113,7 @@ export function CatchScreen({ id }: { id?: string | undefined }): React.JSX.Elem
   const { form, isNew, set } = state;
 
   return (
-    <Screen gap={space.gap}>
+    <Screen gap={space.gap} keyboardAware>
       <Text variant="h2" accessibilityRole="header">
         {isNew ? t('diary.newTitle') : t('diary.editTitle')}
       </Text>

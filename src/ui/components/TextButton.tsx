@@ -1,6 +1,9 @@
 import { Pressable } from 'react-native';
 
-import { Text, colors, space, MIN_TOUCH_SIZE } from '@/ui';
+import { useColors } from '../theme';
+import { space, MIN_TOUCH_SIZE } from '../tokens';
+
+import { Text } from './Text';
 
 /** A quiet action next to a filled button: deleting should not shout. */
 export function TextButton({
@@ -10,6 +13,7 @@ export function TextButton({
   label: string;
   onPress: () => void;
 }): React.JSX.Element {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"

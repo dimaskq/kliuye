@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PanResponder, View } from 'react-native';
 
-import { Card, Text, colors, sizes, space } from '@/ui';
+import { Card, Text, sizes, space, useColors } from '@/ui';
 import { formatHour } from '@/utils/format';
 
 import { HourCurve } from './HourCurve';
@@ -25,6 +25,7 @@ export function hourAt(x: number, width: number, hours: number): number {
 }
 
 function Axis({ hours }: { hours: number }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: space.sm }}>
       {AXIS_TICKS.map((hour) => (
@@ -43,6 +44,7 @@ type ChartHeaderProps = {
 };
 
 function ChartHeader({ hour, value, onStepHour }: ChartHeaderProps): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   return (
     <>
@@ -142,6 +144,7 @@ export function HourlyChart({
   onSelectHour,
   onStepHour,
 }: HourlyChartProps): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const [width, setWidth] = useState(0);
 

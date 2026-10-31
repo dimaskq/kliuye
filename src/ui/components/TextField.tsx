@@ -1,7 +1,9 @@
 import { TextInput, View } from 'react-native';
 import type { KeyboardTypeOptions, ViewStyle } from 'react-native';
 
-import { colors, radius, space, textVariants, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { radius, space, textVariants, MIN_TOUCH_SIZE } from '../tokens';
+import type { Colors } from '../tokens';
 
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
@@ -23,7 +25,7 @@ export type TextFieldProps = {
   onSubmit?: () => void;
 };
 
-function shell(multiline: boolean): ViewStyle {
+function shell(multiline: boolean, colors: Colors): ViewStyle {
   return {
     flexDirection: 'row',
     alignItems: multiline ? 'flex-start' : 'center',
@@ -50,8 +52,9 @@ export function TextField({
   maxLength,
   onSubmit,
 }: TextFieldProps): React.JSX.Element {
+  const colors = useColors();
   return (
-    <View style={shell(multiline)}>
+    <View style={shell(multiline, colors)}>
       <Icon name={icon} color={colors.textAlpha[45]} />
       <TextInput
         accessibilityLabel={accessibilityLabel}

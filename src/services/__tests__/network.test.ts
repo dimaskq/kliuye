@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- a reset registry can only be re-entered with require. */
 import type * as ReactQuery from '@tanstack/react-query';
 import type * as ExpoNetwork from 'expo-network';
+import type { AppStateStatic } from 'react-native';
 
 import { isOnlineState } from '../network';
 import type * as NetworkModule from '../network';
@@ -83,5 +84,45 @@ describe('startNetworkWatch', () => {
     await flush();
 
     expect(expoNetwork.addNetworkStateListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads the state again when the app returns from the background', async () => {
+    const { network, expoNetwork } = freshModules();
+    const { AppState } = require('react-native') as { AppState: AppStateStatic };
+    let onChange: ((status: string) => void) | undefined;
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      onChange = listener as typeof onChange;
+      return { remove: jest.fn() } as never;
+    });
+    expoNetwork.addNetworkStateListener.mockReturnValue({ remove: jest.fn() } as never);
+    /* Android blocked the app while it was in recents, and never said it stopped. */
+    expoNetwork.getNetworkStateAsync.mockResolvedValueOnce({
+      isConnected: false,
+      isInternetReachable: false,
+    } as never);
+
+    network.startNetworkWatch();
+    await flush();
+    expect(network.isOnline()).toBe(false);
+
+    expoNetwork.getNetworkStateAsync.mockResolvedValueOnce({
+      isConnected: true,
+      isInternetReachable: true,
+    } as never);
+    onChange?.('active');
+    await flush();
+
+    expect(network.isOnline()).toBe(true);
+  });
+});
+
+describe('reportReachable', () => {
+  it('takes any answer from a server as proof of a connection', () => {
+    const { network, onlineManager } = freshModules();
+    onlineManager.setOnline(false);
+
+    network.reportReachable();
+
+    expect(network.isOnline()).toBe(true);
   });
 });

@@ -25,7 +25,7 @@ export function useMapDialogs(point: CustomPoint | undefined) {
   const save = (name: string): void => {
     close();
     if (point === undefined) return;
-    const named = { ...point, label: name.trim() || point.label || fallbackName };
+    const named = { ...point, label: name.trim() || point.label || point.area || fallbackName };
     choosePoint(named);
     keep(named);
     open();

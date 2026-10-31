@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import type { ViewStyle } from 'react-native';
 
 import type { Attachment } from '@/domain/diary';
-import { Text, colors, radius, space, MIN_TOUCH_SIZE } from '@/ui';
+import { Text, radius, space, MIN_TOUCH_SIZE, useColors } from '@/ui';
 
 import { MediaPreview } from './MediaPreview';
 
@@ -11,7 +11,6 @@ const shell: ViewStyle = {
   gap: space.xxs,
   borderRadius: radius.row,
   borderWidth: 1,
-  borderColor: colors.textAlpha[12],
   paddingVertical: 13,
   paddingHorizontal: 15,
 };
@@ -42,6 +41,7 @@ export function CatchRow({
   accessibilityLabel,
   onPress,
 }: CatchRowProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -49,7 +49,10 @@ export function CatchRow({
       onPress={onPress}
       style={({ pressed }) => [
         shell,
-        { backgroundColor: pressed ? colors.surface : 'transparent' },
+        {
+          borderColor: colors.textAlpha[12],
+          backgroundColor: pressed ? colors.surface : 'transparent',
+        },
       ]}
     >
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.md }}>

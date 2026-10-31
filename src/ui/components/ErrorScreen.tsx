@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { colors, screenPadding, space } from '../tokens';
+import { useColors } from '../theme';
+import { screenPadding, space } from '../tokens';
 
 import { Button } from './Button';
 import { Text } from './Text';
@@ -19,6 +20,7 @@ export function ErrorScreen({
   actionLabel,
   onAction,
 }: ErrorScreenProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={[

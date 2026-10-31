@@ -1,4 +1,5 @@
-import { colors, fontFamily } from '@/ui';
+import { fontFamily } from '@/ui';
+import type { Colors } from '@/ui';
 
 /**
  * The classic teardrop map pin: a round head with a point at the bottom, so the
@@ -27,7 +28,7 @@ export type PinStyle = {
 };
 
 /** DESIGN_SPEC §6: the selected pin is blaze orange, the rest are pale. */
-export function pinStyle(selected: boolean, draggable: boolean): PinStyle {
+export function pinStyle(selected: boolean, draggable: boolean, colors: Colors): PinStyle {
   return {
     fill: selected ? colors.accent : colors.bg,
     label: selected ? colors.onAccent : colors.text,

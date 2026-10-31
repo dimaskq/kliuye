@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { Button, Card, Icon, Text, colors, iconSize, radius, space } from '@/ui';
+import { Button, Card, Icon, Text, iconSize, radius, space, useColors } from '@/ui';
 
 export type TipCardProps = {
   kicker: string;
@@ -18,6 +18,7 @@ export function TipCard({
   actionLabel,
   onAction,
 }: TipCardProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Card
       tone="blaze"

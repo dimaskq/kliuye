@@ -55,6 +55,20 @@ describe('settlement search', () => {
     expect(customPoint).toEqual({ latitude: 43.21912, longitude: 27.91024, label: 'Варна' });
   }, 20_000);
 
+  it('never lets a tap meant for the list drop a pin on the map below', async () => {
+    server.use(http.get(SEARCH_URL, () => HttpResponse.json({ results: [varna] })));
+    await renderWithProviders(<MapScreen />);
+
+    await fireEvent.changeText(screen.getByLabelText('Пошук населеного пункту'), 'Варна');
+    await screen.findByLabelText('Варна, Болгарія · Varna', {}, { timeout: 4000 });
+    await fireEvent(screen.getByLabelText('Мапа водойм'), 'press', {
+      nativeEvent: { lngLat: [30.1, 50.1] },
+    });
+
+    expect(useSelection.getState().customPoint).toBeUndefined();
+    expect(screen.queryByLabelText('Варна, Болгарія · Varna')).toBeNull();
+  }, 20_000);
+
   it('says so when nothing matches, rather than showing an empty list', async () => {
     server.use(http.get(SEARCH_URL, () => HttpResponse.json({ generationtime_ms: 0.2 })));
     await renderWithProviders(<MapScreen />);
@@ -108,6 +122,24 @@ describe('naming a picked point', () => {
 });
 
 describe('picking a point on the map', () => {
+  it('names a point offshore by its region when there is no settlement', async () => {
+    const geocoder = jest.requireMock('expo-location') as { reverseGeocodeAsync: jest.Mock };
+    geocoder.reverseGeocodeAsync.mockResolvedValueOnce([{ region: 'Варненська область' }]);
+    await renderWithProviders(<MapScreen />);
+    await waitFor(() => expect(screen.getByLabelText('Мапа водойм')).toBeOnTheScreen());
+
+    await fireEvent(screen.getByLabelText('Мапа водойм'), 'press', {
+      nativeEvent: { lngLat: [28.05, 43.25] },
+    });
+
+    await waitFor(() =>
+      expect(useSelection.getState().customPoint).toMatchObject({
+        label: '',
+        area: 'Варненська область',
+      }),
+    );
+  }, 20_000);
+
   it('takes a tap as the exact place to forecast for', async () => {
     await renderWithProviders(<MapScreen />);
     await waitFor(() => expect(screen.getByLabelText('Мапа водойм')).toBeOnTheScreen());

@@ -27,7 +27,10 @@ export async function refreshBiteAlerts(now: Date = new Date()): Promise<boolean
   const forecast = await fetchForecast(target, now);
   const week = weeklyScores(
     forecast,
-    { shoreBearingDeg: target.shoreBearingDeg ?? undefined },
+    {
+      shoreBearingDeg: target.shoreBearingDeg ?? undefined,
+      coordinates: { latitude: target.latitude, longitude: target.longitude },
+    },
     target.species,
   );
   if (week === undefined) return false;

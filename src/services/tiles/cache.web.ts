@@ -1,4 +1,4 @@
-import { TILE_CACHE_NAME, tileUrl } from './tileMath';
+import { TILE_CACHE_NAME } from './tileMath';
 import type { Tile } from './tileMath';
 
 /**
@@ -20,23 +20,17 @@ export function tileCachePath(): string | undefined {
   return undefined;
 }
 
-export async function cacheTiles(tiles: readonly Tile[], signal?: AbortSignal): Promise<number> {
-  const cache = await store();
-  if (cache === undefined) return 0;
+export function savedMapStyle(): unknown {
+  return undefined;
+}
 
-  let saved = 0;
-  for (const tile of tiles) {
-    if (signal?.aborted === true) break;
-    const url = tileUrl(tile);
-    try {
-      if ((await cache.match(url)) !== undefined) continue;
-      await cache.add(url);
-      saved += 1;
-    } catch {
-      /* One tile short is a blank square, not a failure. */
-    }
-  }
-  return saved;
+/**
+ * The preview draws OpenStreetMap's raster tiles, whose policy forbids fetching
+ * ahead of the viewer. It keeps only the tiles it has drawn (see
+ * `cachedTiles.web.ts`), so there is nothing to prefetch here.
+ */
+export function cacheTiles(_tiles: readonly Tile[], _signal?: AbortSignal): Promise<number> {
+  return Promise.resolve(0);
 }
 
 export async function tileCacheSize(): Promise<number> {

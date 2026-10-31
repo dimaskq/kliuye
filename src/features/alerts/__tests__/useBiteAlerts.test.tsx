@@ -46,7 +46,9 @@ function renderAlerts() {
 
 describe('useBiteAlerts', () => {
   it('schedules a loud alert for a good day once the switch is on', async () => {
-    usePreferences.setState({ toggles: { offlineMaps: true, notifications: true } });
+    usePreferences.setState({
+      toggles: { offlineMaps: true, notifications: true, crashReports: false },
+    });
     await renderAlerts();
 
     await waitFor(() => expect(notifications.scheduleNotificationAsync).toHaveBeenCalled());
@@ -66,7 +68,9 @@ describe('useBiteAlerts', () => {
   }, 20_000);
 
   it('keeps refreshing between visits: saves the place and starts the 9-hour task', async () => {
-    usePreferences.setState({ toggles: { offlineMaps: true, notifications: true } });
+    usePreferences.setState({
+      toggles: { offlineMaps: true, notifications: true, crashReports: false },
+    });
     await renderAlerts();
 
     await waitFor(() =>

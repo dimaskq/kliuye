@@ -1,10 +1,14 @@
 import {
+  coldLowlandAt,
+  freshRegionAt,
+  seaRegionAt,
   computeBiteScore,
   computeHourlyCurve,
   computeScoreValue,
   computeWeeklyForecast,
 } from '@/domain/bite-index';
 import type { BiteInputs, BiteScore, DailyBiteScore, SpeciesId } from '@/domain/bite-index';
+import type { LatLng } from '@/domain/geo';
 import { moonStateAt } from '@/domain/moon';
 import type { Spot } from '@/domain/spots';
 import { buildTips } from '@/domain/tips';
@@ -48,11 +52,29 @@ export function biteInputsFor(
     sun: day.sun,
     moon: moonStateAt(new Date(forecast.fetchedAt + dayOffset * MS_PER_DAY)),
     seaNearby: forecast.seaNearby,
+    freshwaterNearby: forecast.freshwaterNearby,
+    elevationM: forecast.elevationM,
   };
 }
 
-/** All a model needs from a spot: which way its bank faces. */
-type Shore = Pick<Spot, 'shoreBearingDeg'>;
+/**
+ * All a model needs from a spot: which way its bank faces, and where it is —
+ * which sea, and so which sea fish can be there at all.
+ */
+type Shore = Pick<Spot, 'shoreBearingDeg'> & { coordinates?: LatLng | undefined };
+
+type Place = Pick<BiteInputs, 'seaRegion' | 'freshRegion' | 'located' | 'coldLowland'>;
+
+function placeOf(spot: Shore): Place {
+  const { coordinates } = spot;
+  if (coordinates === undefined) return { located: false };
+  return {
+    seaRegion: seaRegionAt(coordinates),
+    freshRegion: freshRegionAt(coordinates),
+    coldLowland: coldLowlandAt(coordinates),
+    located: true,
+  };
+}
 
 function inputsAt(
   forecast: Forecast,
@@ -66,6 +88,7 @@ function inputsAt(
   return {
     ...biteInputsFor(forecast, day, dayOffset, species, hour),
     shoreBearingDeg: spot.shoreBearingDeg,
+    ...placeOf(spot),
   };
 }
 
@@ -91,7 +114,8 @@ type DayModel = Pick<BiteModel, 'curve' | 'week' | 'today'>;
 const dayModels = new WeakMap<Forecast, Map<string, DayModel>>();
 
 function dayModelFor(forecast: Forecast, spot: Shore, species: SpeciesId): DayModel | undefined {
-  const key = `${spot.shoreBearingDeg ?? ''}|${species}`;
+  const place = placeOf(spot);
+  const key = `${spot.shoreBearingDeg ?? ''}|${place.seaRegion ?? ''}|${place.freshRegion ?? ''}|${String(place.coldLowland)}|${species}`;
   const cached = dayModels.get(forecast)?.get(key);
   if (cached !== undefined) return cached;
 
@@ -112,7 +136,7 @@ function dayModelFor(forecast: Forecast, spot: Shore, species: SpeciesId): DayMo
           species,
           REFERENCE_HOUR,
         );
-        return { ...rest, shoreBearingDeg: spot.shoreBearingDeg };
+        return { ...rest, shoreBearingDeg: spot.shoreBearingDeg, ...placeOf(spot) };
       }),
     }),
   };

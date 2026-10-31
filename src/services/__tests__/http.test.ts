@@ -1,3 +1,4 @@
+import { onlineManager } from '@tanstack/react-query';
 import { HttpResponse, http } from 'msw';
 
 import { server } from '@tests/msw/server';
@@ -90,6 +91,13 @@ describe('getBytes', () => {
   it('fails the same typed way as a JSON request', async () => {
     server.use(http.get(URL, () => new HttpResponse(null, { status: 404 })));
     await expect(getBytes(URL)).rejects.toMatchObject({ kind: 'http', status: 404 });
+  });
+
+  it('does not take a refusing server for a lost connection', async () => {
+    onlineManager.setOnline(false);
+    server.use(http.get(URL, () => new HttpResponse(null, { status: 403 })));
+    await expect(getJson(URL)).rejects.toMatchObject({ kind: 'http', status: 403 });
+    expect(onlineManager.isOnline()).toBe(true);
   });
 });
 

@@ -338,12 +338,12 @@ describe('MapScreen', () => {
 });
 
 describe('ProfileScreen', () => {
-  it('shows local stats, settings, language and a Pro block with no purchase', async () => {
+  it('shows local stats, settings and language, and no Pro block for now', async () => {
     serveForecast();
     await renderWithProviders(<ProfileScreen />);
 
-    await waitFor(() => expect(screen.getByText('Клює Про')).toBeOnTheScreen());
-    expect(screen.getByText('Скоро')).toBeOnTheScreen();
+    await waitFor(() => expect(screen.getByText('Точок')).toBeOnTheScreen());
+    expect(screen.queryByText('Клює Про')).toBeNull();
     expect(screen.getByRole('switch', { name: 'Сповіщення про жор' })).not.toBeChecked();
     expect(screen.getByText('Точок')).toBeOnTheScreen();
     expect(screen.getByRole('link', { name: 'Про застосунок' })).toBeOnTheScreen();
@@ -399,7 +399,15 @@ describe('SettingsScreen', () => {
 
   it('offers only switches that do something', async () => {
     await renderWithProviders(<SettingsScreen />);
-    expect(screen.getAllByRole('switch')).toHaveLength(2);
+    expect(screen.getAllByRole('switch')).toHaveLength(3);
+  });
+
+  it('keeps crash reports off until the angler turns them on', async () => {
+    await renderWithProviders(<SettingsScreen />);
+    expect(screen.getByRole('switch', { name: 'Звіти про збої' })).toHaveProp(
+      'accessibilityState',
+      expect.objectContaining({ checked: false }),
+    );
   });
 });
 
@@ -410,8 +418,13 @@ describe('AboutScreen', () => {
     expect(
       screen.getByText(/^Погодні дані та пошук населених пунктів: Open-Meteo/),
     ).toBeOnTheScreen();
-    expect(screen.getAllByText(/OpenStreetMap/)).toHaveLength(2);
+    expect(screen.getAllByText(/OpenFreeMap/)).toHaveLength(2);
     expect(screen.getByText(/Правила, заборонені періоди/)).toBeOnTheScreen();
+    /* There is a profile, so "no accounts" alone read as a contradiction. */
+    expect(
+      screen.getByText(/Профіль \(ім'я, фото, налаштування\).*нікуди не передаються/),
+    ).toBeOnTheScreen();
+    expect(screen.getByRole('link', { name: 'Як ми рахуємо індекс' })).toBeOnTheScreen();
     expect(screen.getByRole('link', { name: 'Політика приватності' })).toBeOnTheScreen();
     expect(screen.getByText('https://dimaskq.github.io/kliuye/privacy/')).toBeOnTheScreen();
     expect(screen.getByRole('link', { name: 'Написати розробнику' })).toBeOnTheScreen();

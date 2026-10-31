@@ -20,7 +20,7 @@ import {
   Toggle,
 } from '../components';
 import { clampForDisplay, scoreFill, scoreTextColor } from '../scoreColor';
-import { colors, neutral, textVariants } from '../tokens';
+import { lightColors as colors, neutral, textVariants } from '../tokens';
 
 describe('Text', () => {
   it('applies the variant from the token scale', async () => {
@@ -172,7 +172,7 @@ describe('scoreColor', () => {
     [10, neutral[300], neutral[700]],
   ])('maps %p to its band', async (value, fill, text) => {
     expect(scoreFill(value)).toBe(fill);
-    expect(scoreTextColor(value)).toBe(text);
+    expect(scoreTextColor(value, colors)).toBe(text);
   });
 
   it('clamps to a visible range without touching the logical value', async () => {
@@ -230,5 +230,16 @@ describe('CatalogScreen', () => {
     expect(screen.getByRole('header', { name: 'type' })).toBeOnTheScreen();
     expect(screen.getByRole('header', { name: 'score ramp' })).toBeOnTheScreen();
     expect(screen.getByRole('header', { name: 'tabs' })).toBeOnTheScreen();
+  });
+});
+
+describe('Screen and the keyboard', () => {
+  it('still draws a form that follows the keyboard', async () => {
+    await renderWithProviders(
+      <Screen keyboardAware>
+        <Text>Форма</Text>
+      </Screen>,
+    );
+    expect(screen.getByText('Форма')).toBeOnTheScreen();
   });
 });

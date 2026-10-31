@@ -74,6 +74,8 @@ jest.mock('@maplibre/maplibre-react-native', () => {
     Camera,
     Marker: passThrough,
     ViewAnnotation: passThrough,
+    RasterDEMSource: passThrough,
+    Layer: passThrough,
     __commands: commands,
   };
 });
@@ -231,3 +233,21 @@ jest.mock('expo-file-system', () => {
 
   return { Directory, File, Paths: { document: 'file:///documents/' } };
 });
+
+/**
+ * The water check reads map tiles over the network. Screens are tested with
+ * their point on water unless a test says otherwise; the check itself is tested
+ * against the real module in `services/__tests__/water.test.ts`.
+ */
+jest.mock('@/services/coast/water', () => ({
+  ...jest.requireActual<object>('@/services/coast/water'),
+  waterNearby: jest.fn(async () => ({ water: true, fresh: true })),
+}));
+
+/** The crash-report SDK has a native side; tests only need to see the calls. */
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  close: jest.fn(() => Promise.resolve()),
+  wrap: (component: unknown) => component,
+  captureException: jest.fn(),
+}));

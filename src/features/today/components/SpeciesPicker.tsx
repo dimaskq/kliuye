@@ -4,9 +4,13 @@ import { ScrollView } from 'react-native';
 import Animated, { LinearTransition, ReduceMotion } from 'react-native-reanimated';
 
 import type { SpeciesId } from '@/domain/bite-index';
+import { SpeciesArt } from '@/features/species';
 import { Pill, motion, space } from '@/ui';
 
 import { ALL_SPECIES, speciesPillOrder } from '../speciesOrder';
+
+/** Big enough to tell a pike from a perch, small enough to keep the chip a chip. */
+const CHIP_ART = 34;
 
 const pillLayout = LinearTransition.duration(motion.expand).reduceMotion(ReduceMotion.System);
 
@@ -60,6 +64,7 @@ export function SpeciesPicker({
               label={name}
               detail={String(value)}
               selected={id === selected}
+              leading={<SpeciesArt species={id} width={CHIP_ART} />}
               onPress={() => onSelect(id)}
               accessibilityLabel={t('today.speciesAccessible', { name, value })}
             />

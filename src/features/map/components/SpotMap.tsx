@@ -1,4 +1,10 @@
-import { Camera, Map as MapLibreMap, Marker } from '@maplibre/maplibre-react-native';
+import {
+  Camera,
+  Layer,
+  Map as MapLibreMap,
+  Marker,
+  RasterDEMSource,
+} from '@maplibre/maplibre-react-native';
 import type { CameraRef, LngLat } from '@maplibre/maplibre-react-native';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,18 +13,22 @@ import type { NativeSyntheticEvent } from 'react-native';
 
 import type { LatLng } from '@/domain/geo';
 import { useIsOnline } from '@/hooks';
-import { tileCachePath } from '@/services/tiles';
-import { Text, colors, radius, space } from '@/ui';
+import { savedMapStyle, tileCachePath } from '@/services/tiles';
+import { usePreferences } from '@/store';
+import type { MapLayer } from '@/store';
+import { Text, radius, space, useColors } from '@/ui';
 
 import type { ScoredSpot } from '../useSpotScores';
 
 import { MapPin } from './MapPin';
 import {
-  OFFLINE_ATTRIBUTION,
-  ONLINE_ATTRIBUTION,
-  ONLINE_STYLE,
+  RELIEF_BELOW,
+  RELIEF_MAX_ZOOM,
+  RELIEF_TILES,
+  attributionFor,
   fromLngLat,
   offlineStyle,
+  styleFor,
   toLngLat,
 } from './mapStyle';
 import { OVERVIEW_ZOOM, useFocus, useRecentre } from './useMapCamera';
@@ -59,6 +69,7 @@ function SpotPin({ spot, selected, onSelect }: SpotPinProps): React.JSX.Element 
 
 /** The angler's own position, drawn from what the app already knows. */
 function UserDot({ at }: { at: LatLng }): React.JSX.Element {
+  const colors = useColors();
   return (
     <Marker id="user-location" lngLat={toLngLat(at)}>
       <View
@@ -96,6 +107,7 @@ function Pins({ spots, selectedId, onSelect, userLocation }: PinsProps): React.J
 
 /** The map's data sources ask for credit wherever their tiles are drawn. */
 function Attribution({ text }: { text: string }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       pointerEvents="none"
@@ -116,20 +128,46 @@ function Attribution({ text }: { text: string }): React.JSX.Element {
   );
 }
 
-/** Online vector maps, or the tiles saved on the device when there is no signal. */
-function useMapStyle(online: boolean) {
-  return useMemo(() => {
+/**
+ * The chosen look online, or the tiles saved on the device when there is no
+ * signal — those are always the plain map, the one that was saved.
+ */
+function useMapLook() {
+  const colors = useColors();
+  const online = useIsOnline();
+  const layer = usePreferences((state) => state.mapLayer);
+  const style = useMemo(() => {
     const cache = online ? undefined : tileCachePath();
-    return cache === undefined
-      ? { style: ONLINE_STYLE, credit: ONLINE_ATTRIBUTION }
-      : { style: offlineStyle(cache), credit: OFFLINE_ATTRIBUTION };
-  }, [online]);
+    return cache === undefined ? styleFor(layer) : offlineStyle(cache, savedMapStyle(), colors);
+  }, [colors, layer, online]);
+  const shown: MapLayer = online ? layer : 'standard';
+  return { style, relief: shown === 'terrain', credit: attributionFor(shown) };
+}
+
+/** Hills, ravines and steep banks, shaded from open elevation data. */
+function Relief(): React.JSX.Element {
+  return (
+    <RasterDEMSource
+      id="relief"
+      tiles={[RELIEF_TILES]}
+      encoding="terrarium"
+      tileSize={256}
+      maxzoom={RELIEF_MAX_ZOOM}
+    >
+      <Layer
+        id="relief-shade"
+        type="hillshade"
+        beforeId={RELIEF_BELOW}
+        paint={{ 'hillshade-exaggeration': 0.45 }}
+      />
+    </RasterDEMSource>
+  );
 }
 
 /**
  * MapLibre on OpenFreeMap vector tiles — free, with no key and no account —
- * with our own pins on top. Offline it draws the OpenStreetMap tiles the app
- * prefetched for this area while it still had a connection.
+ * with our own pins on top. Offline it draws the tiles the app saved for this
+ * area while it still had a connection.
  */
 export function SpotMap({
   spots,
@@ -141,7 +179,7 @@ export function SpotMap({
 }: SpotMapProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const camera = useRef<CameraRef>(null);
-  const { style, credit } = useMapStyle(useIsOnline());
+  const { style, relief, credit } = useMapLook();
   const centre = spots.find((spot) => spot.id === selectedId) ?? spots[0];
   /* Android places marker views against the loaded map; ones added earlier stick at the corner. */
   const [loaded, setLoaded] = useState(false);
@@ -174,6 +212,7 @@ export function SpotMap({
           ref={camera}
           initialViewState={{ center: toLngLat(centre.coordinates), zoom: OVERVIEW_ZOOM }}
         />
+        {relief ? <Relief /> : null}
         {loaded ? (
           <Pins
             spots={spots}

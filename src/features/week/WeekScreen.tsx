@@ -1,12 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import type { SpeciesId } from '@/domain/bite-index';
+import { NoWaterCard } from '@/features/water';
 import { useCurrentForecast } from '@/hooks';
 import { useDateFormat } from '@/hooks/useDateFormat';
 import type { DateFormatter } from '@/hooks/useDateFormat';
 import { errorMessageKey } from '@/services/errors';
 import { usePreferences, useSelection } from '@/store';
-import { Screen, StatusCard, Text, colors, space } from '@/ui';
+import { Screen, StatusCard, Text, space, useColors } from '@/ui';
 
 import { DayRow, WeekSkeleton } from './components';
 import { toDayRows } from './dayRows';
@@ -44,14 +46,38 @@ function DayList({ rows, dates, expandedIndex, onToggle }: DayListProps): React.
 }
 
 /** Seven days of index, each expandable into its window, wind, pressure and moon. */
+function WeekTitle({ speciesId }: { speciesId: SpeciesId }): React.JSX.Element {
+  const colors = useColors();
+  const { t } = useTranslation();
+  return (
+    <View>
+      <Text variant="h2" accessibilityRole="header">
+        {t('week.title')}
+      </Text>
+      <Text variant="emphasis" color={colors.textAlpha[55]}>
+        {t('week.subtitle', { species: t(`species.${speciesId}`) })}
+      </Text>
+    </View>
+  );
+}
+
 export function WeekScreen(): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const dates = useDateFormat();
   const unitSystem = usePreferences((state) => state.unitSystem);
   const speciesId = useSelection((state) => state.speciesId);
   const selectedDayIndex = useSelection((state) => state.selectedDayIndex);
   const toggleDay = useSelection((state) => state.toggleDay);
-  const { model, forecast, isLoading, isRefreshing, error, refetch } = useCurrentForecast();
+  const { model, forecast, isLoading, isRefreshing, error, refetch, onLand } = useCurrentForecast();
+
+  if (onLand) {
+    return (
+      <Screen>
+        <NoWaterCard />
+      </Screen>
+    );
+  }
 
   if (isLoading) return <WeekSkeleton />;
 
@@ -70,14 +96,7 @@ export function WeekScreen(): React.JSX.Element {
 
   return (
     <Screen onRefresh={refetch} refreshing={isRefreshing}>
-      <View>
-        <Text variant="h2" accessibilityRole="header">
-          {t('week.title')}
-        </Text>
-        <Text variant="emphasis" color={colors.textAlpha[55]}>
-          {t('week.subtitle', { species: t(`species.${speciesId}`) })}
-        </Text>
-      </View>
+      <WeekTitle speciesId={speciesId} />
       <DayList
         rows={toDayRows(model.week, forecast.days, unitSystem, t)}
         dates={dates}

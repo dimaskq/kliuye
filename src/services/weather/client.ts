@@ -50,10 +50,13 @@ function parse<T>(
   return result.data;
 }
 
-/** Sea-surface temperature exists only for coastal points; its absence is normal. */
+/**
+ * Sea-surface temperature and sea level — the tide — exist only for coastal
+ * points; their absence is normal.
+ */
 async function fetchMarine(coordinates: Coordinates, signal: AbortSignal | undefined) {
   const params = commonParams(coordinates);
-  params.set('hourly', 'sea_surface_temperature');
+  params.set('hourly', 'sea_surface_temperature,sea_level_height_msl');
   try {
     return parse(
       marineResponseSchema,

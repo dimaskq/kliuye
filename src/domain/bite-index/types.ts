@@ -1,3 +1,6 @@
+import type { FreshRegion } from './fresh-ranges';
+import type { SeaRegion } from './ranges';
+
 /** Every species the app forecasts for. `all` is the mixed baseline. */
 export const SPECIES_IDS = [
   'all',
@@ -9,6 +12,7 @@ export const SPECIES_IDS = [
   'carp',
   'catfish',
   'crucian',
+  'trout',
   'flounder',
   'turbot',
   'mullet',
@@ -107,6 +111,27 @@ export type BiteInputs = {
    * out; `undefined` means we could not tell yet, and nothing is ruled out.
    */
   seaNearby?: boolean | undefined;
+  /**
+   * Whether there is fresh water at the spot. `false` — a pin out at sea —
+   * rules the freshwater species out; `undefined` rules nothing out.
+   */
+  freshwaterNearby?: boolean | undefined;
+  /** The sea the spot belongs to; `undefined` where the app does not know the fish. */
+  seaRegion?: SeaRegion | undefined;
+  /**
+   * The freshwater region of the spot, and whether the spot is known at all —
+   * `located: false` (no coordinates) rules nothing out by place.
+   */
+  freshRegion?: FreshRegion | undefined;
+  located?: boolean | undefined;
+  /** Height of the spot above the sea, in metres; `undefined` rules nothing out. */
+  elevationM?: number | undefined;
+  /**
+   * Whether the lowland waters here stay cold through the summer — the Atlantic
+   * and northern Europe, the north of North America; `undefined` (no place)
+   * rules nothing out.
+   */
+  coldLowland?: boolean | undefined;
 };
 
 export type BestWindow = {
@@ -127,10 +152,15 @@ export type BiteScore = {
 };
 
 /**
- * `noSea` — a sea fish with no sea within reach; `noSeason` — a month in which
- * the species is not caught at all (dormant, migrated away, or closed).
+ * `noSea` — a sea fish with no sea within reach; `noFreshwater` — a freshwater
+ * fish with no fresh water at the spot; `notInThisSea` — a sea fish that does
+ * not live in this sea (cod in the Black Sea); `notInThisRegion` — a freshwater
+ * fish far from its range (wels in Africa); `tooHigh` — a lowland fish high in
+ * the mountains; `tooLow` — a mountain fish (trout) in a warm lowland; `noSeason` — a month in which the
+ * species is not caught at all (dormant, migrated away, or closed).
  */
-export type RuledOut = 'noSea' | 'noSeason';
+export type RuledOut =
+  'noSea' | 'noFreshwater' | 'notInThisSea' | 'notInThisRegion' | 'tooHigh' | 'tooLow' | 'noSeason';
 
 export type DailyBiteScore = BiteScore & {
   /** Days from today: 0 is today. */

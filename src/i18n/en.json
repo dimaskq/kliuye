@@ -14,7 +14,8 @@
     "approx": "≈",
     "loading": "Loading",
     "staleData": "Data from {{time}}",
-    "offline": "No connection — showing saved data"
+    "offline": "No connection — showing saved data",
+    "back": "Back"
   },
   "error": {
     "network": "No network connection.",
@@ -50,7 +51,12 @@
       "note": "The weather has killed the bite. Better to sort tackle at home."
     },
     "noSea": "No sea within 5 km — this fish does not live here.",
-    "noSeason": "Out of season — this fish is not caught this month."
+    "noSeason": "Out of season — this fish is not caught this month.",
+    "noFreshwater": "No fresh water here — this fish does not live in the sea.",
+    "notInThisSea": "This fish does not live in this sea.",
+    "notInThisRegion": "This fish does not live in these parts.",
+    "tooHigh": "Too high in the mountains — this fish does not live here.",
+    "tooLow": "Too warm a lowland — this fish needs cold mountain water."
   },
   "species": {
     "all": "All species",
@@ -62,6 +68,7 @@
     "carp": "Carp",
     "catfish": "Catfish",
     "crucian": "Crucian carp",
+    "trout": "Trout",
     "flounder": "Flounder",
     "turbot": "Turbot",
     "mullet": "Mullet",
@@ -219,7 +226,20 @@
     "placesTitle": "My places",
     "route": "Route",
     "routeTitle": "How to get to “{{name}}”?",
-    "routeByCar": "By car"
+    "routeByCar": "By car",
+    "layersButton": "Map view",
+    "layersTitle": "Map view",
+    "layersOffline": "Without a signal the plain map is shown — the one saved on your phone.",
+    "layer": {
+      "standard": "Default",
+      "standardHint": "Roads, water, woods and names",
+      "terrain": "Terrain",
+      "terrainHint": "Hills, gullies and steep banks",
+      "light": "Light",
+      "lightHint": "Calm, so the points stand out",
+      "dark": "Dark",
+      "darkHint": "For evenings and nights on the water"
+    }
   },
   "locationPrompt": {
     "title": "Allow access to your location",
@@ -386,7 +406,20 @@
     "mediaRemove": "Remove file {{index}}",
     "photos_one": "{{count}} photo",
     "photos_other": "{{count}} photos",
-    "rowWithMedia": "{{species}}, {{weight}}, {{day}}, {{place}}, {{media}}"
+    "rowWithMedia": "{{species}}, {{weight}}, {{day}}, {{place}}, {{media}}",
+    "mediaOpen": "Open photo {{current}} of {{total}}",
+    "mediaPosition": "{{current}} / {{total}}",
+    "mediaClose": "Close viewer",
+    "placeOnMap": "On the map",
+    "placeHere": "Where I am",
+    "placeLocating": "Finding you…",
+    "placeSaved": "Saved",
+    "placeMapTitle": "Where was it caught?",
+    "placeMapHint": "Tap the map to drop a point",
+    "placeDone": "Done",
+    "placePoint": "Point: {{position}}",
+    "placeNoLocation": "No access to your location — pick the place on the map or from your saved ones.",
+    "mediaPhoto": "Photo {{current}} of {{total}}"
   },
   "profile": {
     "statsSummary": "{{trips}} · {{fish}} · since {{year}}",
@@ -426,19 +459,29 @@
     "offlineMapsHint": "Keep the map around your spots",
     "offlineCacheTitle": "Saved map",
     "offlineCacheSize": "On the device: {{size}} MB",
-    "offlineCacheClear": "Clear"
+    "offlineCacheClear": "Clear",
+    "crashReports": "Crash reports",
+    "crashReportsHint": "Anonymous: what broke and on which screen. No name, places or photos",
+    "theme": {
+      "title": "Theme",
+      "system": "Like the phone",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "replayTours": "Show the tips again",
+    "replayToursHint": "The first-launch tour and the tour of Today, once more"
   },
   "about": {
     "title": "About",
     "disclaimerTitle": "A forecast, not a guarantee",
     "disclaimer": "The bite index is an estimate based on open weather data. It is not a guarantee of a catch.",
     "sourcesTitle": "Data sources",
-    "sources": "Weather data and settlement search: Open-Meteo. Maps: OpenFreeMap, built on OpenStreetMap; OpenStreetMap tiles in the browser and offline. Map tiles for your spots are stored on the device. The moon phase is computed on the device using Meeus algorithm.",
+    "sources": "Weather data and place search: Open-Meteo. Map: OpenFreeMap, built from OpenStreetMap; the map around your points is saved on the device for offline use. Map relief: Terrain Tiles (Mapzen) on AWS. Whether a point is on water is checked against the same OpenFreeMap vector data. The moon phase is computed on the device with Meeus's algorithm. Fish pictures: engravings by Marcus Elieser Bloch (1782–1795), public domain.",
     "openMeteo": "Open open-meteo.com",
     "rulesTitle": "Fishing rules",
     "rules": "Rules, closed seasons and licence requirements vary by region. Check local regulations before you go.",
     "privacyTitle": "Privacy",
-    "privacy": "No accounts, analytics or ads. Your journal, photos, profile and saved places stay on this phone. To fetch the forecast, coordinates rounded to about 1 km are sent to Open-Meteo; the map comes from OpenFreeMap and OpenStreetMap, place names from your phone's geocoder. See the privacy policy for details.",
+    "privacy": "No sign-up, no analytics, no ads. Your profile (name, photo, settings), journal and saved places stay on this phone only and are never sent anywhere. To get a forecast, coordinates rounded to about 1 km are sent to Open-Meteo; the map and water data come from OpenFreeMap, and place names from your phone's own geocoder. Crash reports only if you turn them on in Settings: anonymous, via Sentry, on servers in the EU. Details are in the privacy policy.",
     "privacyPolicy": "Privacy policy",
     "licensesTitle": "Licences",
     "licenses": "Open-source licences",
@@ -477,7 +520,8 @@
       "named": "{{place}}",
       "unnamed": "Point on the map",
       "meta": "picked on the map",
-      "region": "picked on the map"
+      "region": "picked on the map",
+      "area": "{{area}}"
     }
   },
   "speciesPicker": {
@@ -493,7 +537,12 @@
     "outOfSeason": "out of season",
     "noSea": "no sea nearby",
     "noSeason": "not biting now",
-    "accessible": "{{name}}, index {{value}}, {{meta}}"
+    "accessible": "{{name}}, index {{value}}, {{meta}}",
+    "noFreshwater": "no fresh water here",
+    "notInThisSea": "not found in this sea",
+    "notInThisRegion": "not found in these parts",
+    "tooHigh": "too high in the mountains",
+    "tooLow": "lowland water too warm"
   },
   "notifications": {
     "channel": "Bite alerts",
@@ -502,5 +551,129 @@
       "good": "Good bite at “{{place}}”"
     },
     "body": "Bite window {{start}}–{{end}}, index {{value}}. Grab your gear — it starts in an hour."
+  },
+  "water": {
+    "noWaterTitle": "There is no water here",
+    "noWaterBody": "The bite index is only worked out for water. Put the point on a lake, river, pond or the sea, and the forecast will appear.",
+    "pickOnMap": "Pick water on the map",
+    "noWaterHint": "No water here — put the point on a lake or river"
+  },
+  "howItWorks": {
+    "title": "How the index works",
+    "linkLabel": "How do we work it out?",
+    "linkHint": "The factors, their weight, and what the index cannot know",
+    "intro": "The 0–100 index shows how much the weather right now favours fish feeding. We take the Open-Meteo forecast for your point, rate each factor from \"hurts\" to \"helps\" and add them up with the weights below. Then the species and the season are taken into account.",
+    "factorsTitle": "Eight factors and their weight",
+    "factorName": {
+      "pressure": "Air pressure and its change",
+      "waterTemperature": "Water temperature",
+      "wind": "Wind",
+      "moon": "Moon phase",
+      "timeOfDay": "Time of day",
+      "cloudCover": "Cloud cover",
+      "precipitation": "Rain",
+      "airWaterDelta": "Air versus water"
+    },
+    "factor": {
+      "pressure": "The biggest factor. Fish feed best on steady or slowly falling pressure; a sharp jump either way shuts the bite down.",
+      "waterTemperature": "The closer the water is to the species' comfort range, the higher the score. At sea we use marine data; in fresh water, an estimate from the last days' weather.",
+      "wind": "A light ripple beats both dead calm and a gale. Wind blowing onto your bank adds points: it pushes food there.",
+      "moon": "New and full moon bring the strongest feeding pushes; the quarters are neutral.",
+      "timeOfDay": "Peaks just after sunrise and before sunset. How strong they are differs by species.",
+      "cloudCover": "Broken cloud beats a clear sky, which keeps predators hiding in cover.",
+      "precipitation": "Drizzle helps, a downpour does not. Dry weather is neutral.",
+      "airWaterDelta": "Air slightly warmer than the water means a stable day. A cold snap over warm water drives fish deep."
+    },
+    "speciesTitle": "How this differs by species",
+    "species": "Every species has its own profile: its comfortable water temperature, how much pressure changes put it off, how much wind it tolerates, and how strong its morning and evening peaks are. That is why on the same day pike can score 80 and bream 45.",
+    "seasonTitle": "Season",
+    "season": "Finally the score is multiplied by the species' seasonal factor, taken from angling calendars. During spawning or out of season the index drops, and sea fish are not scored at all far from the sea. Sea fish are also scored only where they live: there is no cod in the Black Sea and no horse mackerel off Norway. The same goes for fresh water: no wels catfish in Africa, and no carp high in the mountains, where trout live. And no trout in a warm lowland such as the Donbas steppe.",
+    "limitsTitle": "What the index cannot know",
+    "limits": "Depth, the shape of the bottom, current, water clarity, other anglers, and whether the fish actually live in this water. It is an estimate from open weather data, not a promise of a catch.",
+    "presenceTitle": "The per-species index is not a fish map",
+    "presence": "The index shows how active a species is in the current weather, not whether that fish lives in this water. If there are no pike here, a high pike index will not put them there.",
+    "speciesNote": "The index shows how active a species is in the current weather, not whether that fish lives in this water. Check local fishing rules."
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Get started",
+    "progress": "Step {{step}} of {{total}}",
+    "welcome": {
+      "title": "Kliuye — bite forecast",
+      "body": "See how much the weather favours the bite today, hour by hour and for the week ahead. No sign-up, no ads, and it works without a signal."
+    },
+    "point": {
+      "title": "Put a point on the water",
+      "body": "On the Map tab, search for a town or just tap a lake, river or the sea. The index is only worked out for water."
+    },
+    "index": {
+      "title": "Where the index comes from",
+      "body": "0–100: the higher, the better the weather for the bite. The number is built from 8 weather factors, and this is how much each one weighs. Then we take the species and the season into account."
+    },
+    "more": {
+      "title": "What next",
+      "body": "Save the spot, get a route, log your catch in the journal. Turn on notifications in Settings and we will tell you when a good day is coming."
+    }
+  },
+  "featureTour": {
+    "hint": "Tap anywhere to go on",
+    "finish": "Tap to start fishing",
+    "place": {
+      "title": "Your water",
+      "body": "The place the bite is worked out for. Tap the name to pick another point on the map."
+    },
+    "index": {
+      "title": "Bite index",
+      "body": "From 0 to 100: how active fish are in this weather, and the best hours today."
+    },
+    "species": {
+      "title": "Which fish",
+      "body": "Pick a fish and the index is worked out for it. “All species” opens the catalogue."
+    },
+    "places": {
+      "title": "My places",
+      "body": "Saved and recent places: switch to another water in one tap."
+    },
+    "week": {
+      "title": "Week",
+      "body": "The bite seven days ahead, to plan a trip."
+    },
+    "map": {
+      "title": "Map",
+      "body": "Drop a pin on any water, see its index and save the place."
+    },
+    "diary": {
+      "title": "Journal",
+      "body": "Log catches with photos, weight and place. It all stays on the phone."
+    }
+  },
+  "explainer": {
+    "title": "Where does this number come from?",
+    "body": "It is not a weather forecast and not a random figure. The 0–100 index is built from 8 weather factors, each with its own weight. These matter most:",
+    "more": "We also count the moon phase, time of day, rain and cloud, then the species and the season. The index shows how active fish are in this weather, not that they are sure to be in this water.",
+    "open": "How we work it out",
+    "dismiss": "Got it"
+  },
+  "tomorrow": {
+    "title": "Tomorrow · {{day}}, {{date}}",
+    "air": "Air",
+    "airValue": "{{low}}…{{high}}°",
+    "wind": "Wind",
+    "windValue": "{{speed}} {{direction}}, up to {{gusts}}",
+    "pressure": "Pressure",
+    "pressure_metric": "{{value}} mmHg · {{trend}}",
+    "pressure_imperial": "{{value}} inHg · {{trend}}",
+    "trend": {
+      "rising": "rising",
+      "falling": "falling",
+      "steady": "steady"
+    },
+    "rain": "Chance of rain",
+    "tides": "Tides",
+    "tide_high": "{{time}} — high water, {{height}} m",
+    "tide_low": "{{time}} — low water, {{height}} m",
+    "week": "The whole week",
+    "weekHint": "Bite window, wind, pressure and moon for 7 days"
   }
 }

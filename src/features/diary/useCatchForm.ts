@@ -1,9 +1,8 @@
-import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 import type { CatchDraft } from '@/domain/diary';
 import { shiftDays } from '@/domain/diary';
-import { useActiveSpot, useNow, useSpotLabel } from '@/hooks';
+import { useActiveSpot, useLeave, useNow, useSpotLabel } from '@/hooks';
 import { useDiary, useSelection } from '@/store';
 
 import { draftOf, emptyForm, formOf } from './catchForm';
@@ -21,7 +20,7 @@ export type CatchFormState = {
 
 /** Writing an entry away and leaving the screen, whichever button was pressed. */
 function useCommit(id: string | undefined) {
-  const router = useRouter();
+  const leave = useLeave('/diary');
   const add = useDiary((state) => state.add);
   const update = useDiary((state) => state.update);
   const drop = useDiary((state) => state.remove);
@@ -30,11 +29,11 @@ function useCommit(id: string | undefined) {
     save: (draft: CatchDraft): void => {
       if (id === undefined) add(draft);
       else update(id, draft);
-      router.back();
+      leave();
     },
     remove: (): void => {
       if (id !== undefined) drop(id);
-      router.back();
+      leave();
     },
   };
 }
@@ -50,7 +49,7 @@ export function useCatchForm(id: string | undefined): CatchFormState {
 
   /* Seeded once: after that the fields belong to the user, not to the screen. */
   const [form, setForm] = useState<CatchForm>(() =>
-    entry === undefined ? emptyForm(now, speciesId, place) : formOf(entry),
+    entry === undefined ? emptyForm(now, speciesId, place, spot.coordinates) : formOf(entry),
   );
 
   const set: CatchFormState['set'] = useCallback(
@@ -63,7 +62,8 @@ export function useCatchForm(id: string | undefined): CatchFormState {
     isNew: id === undefined,
     set,
     stepDay: (delta) => set('caughtAt', shiftDays(form.caughtAt, delta)),
-    save: () => commit.save(draftOf(form, spot.coordinates)),
+    /* An edited entry keeps its own point, not whatever water is in view now. */
+    save: () => commit.save(draftOf(form)),
     remove: commit.remove,
   };
 }

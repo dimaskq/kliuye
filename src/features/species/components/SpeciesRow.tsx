@@ -1,8 +1,17 @@
 import { Pressable, View } from 'react-native';
 
-import { Icon, ScoreBadge, Text, colors, iconSize, radius, space, MIN_TOUCH_SIZE } from '@/ui';
+import type { SpeciesId } from '@/domain/bite-index';
+import { Icon, ScoreBadge, Text, iconSize, radius, space, MIN_TOUCH_SIZE, useColors } from '@/ui';
+
+import { SPECIES_ART } from '../speciesArt';
+
+import { SpeciesArt } from './SpeciesArt';
+
+/** Wide enough that the fish, not the frame, is what the eye lands on. */
+const ROW_ART = 72;
 
 export type SpeciesRowProps = {
+  species: SpeciesId;
   name: string;
   meta: string;
   value: number;
@@ -11,8 +20,23 @@ export type SpeciesRowProps = {
   onPress: () => void;
 };
 
-/** One species: its index for the water in view, and when it is worth going. */
+/** The engraving, or a plain fish where there is none. */
+function RowArt({ species }: { species: SpeciesId }): React.JSX.Element {
+  const colors = useColors();
+  return (
+    <View style={{ width: ROW_ART, alignItems: 'center' }}>
+      {SPECIES_ART[species] === undefined ? (
+        <Icon name="fish" size={iconSize.action * 1.3} color={colors.textAlpha[45]} />
+      ) : (
+        <SpeciesArt species={species} width={ROW_ART} />
+      )}
+    </View>
+  );
+}
+
+/** One species: what it looks like, its index for the water in view, and when it is worth going. */
 export function SpeciesRow({
+  species,
   name,
   meta,
   value,
@@ -20,6 +44,7 @@ export function SpeciesRow({
   accessibilityLabel,
   onPress,
 }: SpeciesRowProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -39,7 +64,7 @@ export function SpeciesRow({
         paddingHorizontal: 15,
       }}
     >
-      <ScoreBadge value={value} selected={selected} />
+      <RowArt species={species} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text variant="rowTitle">{name}</Text>
         <Text
@@ -51,7 +76,7 @@ export function SpeciesRow({
           {meta}
         </Text>
       </View>
-      {selected ? <Icon name="chevron-right" size={iconSize.action} color={colors.accent} /> : null}
+      <ScoreBadge value={value} selected={selected} />
     </Pressable>
   );
 }

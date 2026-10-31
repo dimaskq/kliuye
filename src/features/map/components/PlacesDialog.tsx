@@ -19,6 +19,11 @@ const LIST_MAX_HEIGHT = 380;
 export type PlacesDialogProps = {
   visible: boolean;
   onClose: () => void;
+  /**
+   * What choosing a place does. By default it becomes the place being forecast
+   * for; the journal passes its own, to set where a fish was caught instead.
+   */
+  onChoose?: ((point: CustomPoint) => void) | undefined;
 };
 
 /** The remembered point being forecast for right now, if any. */
@@ -34,13 +39,18 @@ function useActivePointKey(): string | undefined {
  * Choosing one makes it the active place and closes the list — the same on
  * every screen that offers it.
  */
-export function PlacesDialog({ visible, onClose }: PlacesDialogProps): React.JSX.Element {
+export function PlacesDialog({
+  visible,
+  onClose,
+  onChoose: choose,
+}: PlacesDialogProps): React.JSX.Element {
   const { t } = useTranslation();
   const choosePoint = useChoosePoint();
-  const activeKey = useActivePointKey();
+  const activePointKey = useActivePointKey();
+  const activeKey = choose === undefined ? activePointKey : undefined;
   const onChoose = (point: CustomPoint): void => {
     onClose();
-    choosePoint(point);
+    (choose ?? choosePoint)(point);
   };
   const { recent, favourites, toggleFavourite } = usePoints();
   const [tab, setTab] = useState<TabId>('favourites');

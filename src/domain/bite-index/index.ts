@@ -1,4 +1,6 @@
 import { FACTOR_COMPUTATIONS } from './factors';
+import { livesAt, livesInFresh, livesLow } from './fresh-ranges';
+import { livesIn } from './ranges';
 import { NONE, activityIn } from './seasons';
 import { profileFor } from './species-profiles';
 import { FACTOR_IDS } from './types';
@@ -18,10 +20,28 @@ export const HOURS_PER_DAY = 24;
 export const BEST_WINDOW_HOURS = 3;
 /** Whether the species cannot be caught here and now at all, whatever the weather. */
 export function ruledOutFor(
-  inputs: Pick<BiteInputs, 'species' | 'month' | 'seaNearby'>,
+  inputs: Pick<
+    BiteInputs,
+    | 'species'
+    | 'month'
+    | 'seaNearby'
+    | 'freshwaterNearby'
+    | 'seaRegion'
+    | 'freshRegion'
+    | 'located'
+    | 'elevationM'
+    | 'coldLowland'
+  >,
 ): RuledOut | undefined {
   const profile = profileFor(inputs.species);
   if (profile.habitat === 'sea' && inputs.seaNearby === false) return 'noSea';
+  if (profile.habitat === 'freshwater' && inputs.freshwaterNearby === false) return 'noFreshwater';
+  if (!livesIn(inputs.species, inputs.seaRegion)) return 'notInThisSea';
+  if (!livesInFresh(inputs.species, inputs.freshRegion, inputs.located === true)) {
+    return 'notInThisRegion';
+  }
+  if (!livesAt(inputs.species, inputs.elevationM)) return 'tooHigh';
+  if (!livesLow(inputs.species, inputs.elevationM, inputs.coldLowland)) return 'tooLow';
   if (activityIn(profile.activity, inputs.month) === NONE) return 'noSeason';
   return undefined;
 }
@@ -140,5 +160,19 @@ export { FACTOR_WEIGHTS, totalWeight } from './weights';
 export { SPECIES_PROFILES, profileFor, speciesOf } from './species-profiles';
 export type { SpeciesProfile } from './species-profiles';
 export { FAIR, GOOD, IN_SEASON_FROM, NONE, PEAK, POOR, activityIn } from './seasons';
+export { SEA_RANGES, SEA_REGIONS, livesIn, seaRegionAt } from './ranges';
+export {
+  FRESH_RANGES,
+  FRESH_REGIONS,
+  MAX_ELEVATION_M,
+  MIN_ELEVATION_M,
+  coldLowlandAt,
+  freshRegionAt,
+  livesAt,
+  livesInFresh,
+  livesLow,
+} from './fresh-ranges';
+export type { FreshRegion } from './fresh-ranges';
+export type { SeaRegion } from './ranges';
 export type { MonthlyActivity } from './seasons';
 export { verdictFor, verdictNoteKey, verdictWordKey } from './verdicts';

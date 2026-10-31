@@ -1,12 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { IconButton, Text, colors, iconSize, space, MIN_TOUCH_SIZE } from '@/ui';
+import { IconButton, Text, iconSize, space, MIN_TOUCH_SIZE, useColors } from '@/ui';
 
 const HEADER_BUTTON = {
   size: MIN_TOUCH_SIZE,
   glyphSize: iconSize.tab,
-  background: colors.surface,
 } as const;
 
 export type MapHeaderProps = {
@@ -16,6 +15,7 @@ export type MapHeaderProps = {
 
 /** The question the screen answers, and the two ways back to a place. */
 export function MapHeader({ onFocusPin, onOpenPlaces }: MapHeaderProps): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
@@ -24,12 +24,14 @@ export function MapHeader({ onFocusPin, onOpenPlaces }: MapHeaderProps): React.J
       </Text>
       <IconButton
         {...HEADER_BUTTON}
+        background={colors.surface}
         icon="map-pin"
         label={t('map.focusPin')}
         onPress={onFocusPin}
       />
       <IconButton
         {...HEADER_BUTTON}
+        background={colors.surface}
         icon="list"
         label={t('map.placesTitle')}
         onPress={onOpenPlaces}

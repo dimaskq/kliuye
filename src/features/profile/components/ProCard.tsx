@@ -1,4 +1,4 @@
-import { Card, Tag, Text, colors, space } from '@/ui';
+import { Card, Tag, Text, space, useColors } from '@/ui';
 
 export type ProCardProps = {
   title: string;
@@ -11,6 +11,7 @@ export type ProCardProps = {
  * 3.1.1 rejection (STORE_REVIEW.md §3).
  */
 export function ProCard({ title, body, soonLabel }: ProCardProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Card
       tone="accent"

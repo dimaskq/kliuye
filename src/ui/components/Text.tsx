@@ -2,7 +2,8 @@
 import { Text as RNText } from 'react-native';
 import type { StyleProp, TextProps as RNTextProps, TextStyle } from 'react-native';
 
-import { colors, textVariants } from '../tokens';
+import { useColors } from '../theme';
+import { textVariants } from '../tokens';
 import type { TextVariant } from '../tokens';
 
 export type TextProps = Omit<RNTextProps, 'style'> & {
@@ -18,11 +19,13 @@ export type TextProps = Omit<RNTextProps, 'style'> & {
  */
 export function Text({
   variant = 'body',
-  color = colors.text,
+  color: colorProp,
   align,
   style,
   ...rest
 }: TextProps): React.JSX.Element {
+  const colors = useColors();
+  const color = colorProp ?? colors.text;
   return (
     <RNText
       {...rest}

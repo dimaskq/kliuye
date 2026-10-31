@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Dialog, IconButton, Text, TextField, colors, iconSize, space } from '@/ui';
+import { Dialog, IconButton, Text, TextField, iconSize, space, useColors } from '@/ui';
 
 const CONFIRM_SIZE = 52;
 
@@ -24,6 +24,7 @@ type NameRowProps = {
  * answer after the dialog has opened.
  */
 function NameRow({ suggestedName, onConfirm }: NameRowProps): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const [edited, setEdited] = useState<string | undefined>(undefined);
   const name = edited ?? suggestedName;
@@ -65,6 +66,7 @@ export function SavePointDialog({
   onCancel,
   onConfirm,
 }: SavePointDialogProps): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
 
   return (

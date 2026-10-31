@@ -64,7 +64,21 @@ describe('spots', () => {
   it('names a picked point by its settlement once one is known', () => {
     const searched = customSpot({ ...VARNA, label: 'Варна' });
     expect(searched.nameKey).toBe('spots.custom.named');
-    expect(searched.nameParams).toEqual({ place: 'Варна', position: '43.210, 27.910' });
+    expect(searched.nameParams).toMatchObject({ place: 'Варна', position: '43.210, 27.910' });
+  });
+
+  it('puts the region under a named point, instead of "picked on the map"', () => {
+    const named = customSpot({ ...VARNA, label: 'Наш берег', area: 'Варненська область' });
+    expect(named.nameKey).toBe('spots.custom.named');
+    expect(named.regionKey).toBe('spots.custom.area');
+    expect(named.regionParams?.['area']).toBe('Варненська область');
+  });
+
+  it('names a point with no settlement by its district or region', () => {
+    const offshore = customSpot({ ...VARNA, label: '', area: 'Варненська область' });
+    expect(offshore.nameKey).toBe('spots.custom.area');
+    expect(offshore.nameParams?.['area']).toBe('Варненська область');
+    expect(offshore.regionKey).toBe('spots.custom.region');
   });
 
   it('says where an unnamed point is rather than guessing a name for it', () => {

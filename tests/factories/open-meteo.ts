@@ -23,6 +23,8 @@ export function makeForecastResponse(overrides: Partial<ForecastResponse> = {}):
     longitude: 30.49,
     utc_offset_seconds: 10_800,
     timezone: 'Europe/Kyiv',
+    /* The Kyiv reservoir: lowland, where every freshwater fish lives. */
+    elevation: 103,
     hourly: {
       time: Array.from(
         { length: TOTAL_HOURS },
@@ -50,7 +52,19 @@ export function makeForecastResponse(overrides: Partial<ForecastResponse> = {}):
   };
 }
 
-export function makeMarineResponse(seaSurfaceTemperature = 11): MarineResponse {
+/** A semidiurnal tide — two highs and two lows a day — of the given range. */
+export function tideSeries(rangeM: number): number[] {
+  const period = 12.42;
+  return Array.from(
+    { length: TOTAL_HOURS },
+    (_, i) => (rangeM / 2) * Math.cos((2 * Math.PI * i) / period),
+  );
+}
+
+export function makeMarineResponse(
+  seaSurfaceTemperature = 11,
+  seaLevel: number[] | undefined = undefined,
+): MarineResponse {
   return {
     hourly: {
       time: Array.from({ length: TOTAL_HOURS }, (_, i) => `hour-${i}`),
@@ -58,6 +72,7 @@ export function makeMarineResponse(seaSurfaceTemperature = 11): MarineResponse {
         { length: TOTAL_HOURS },
         (_, i) => seaSurfaceTemperature + Math.floor(i / HOURS_PER_DAY) * 0.3,
       ),
+      sea_level_height_msl: seaLevel,
     },
   };
 }

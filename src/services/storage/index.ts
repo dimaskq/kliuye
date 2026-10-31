@@ -20,6 +20,8 @@ export const storageKeys = {
   alertTarget: `${NAMESPACE}.alert-target`,
   /** Whether each place has sea within reach — coastlines do not move, so it is kept. */
   seaNearby: `${NAMESPACE}.sea-nearby`,
+  /** Whether each picked point is on water — the same reasoning, at a finer grain. */
+  waterNearby: `${NAMESPACE}.water-nearby`,
 } as const;
 
 export type StorageKey = (typeof storageKeys)[keyof typeof storageKeys];
@@ -43,6 +45,17 @@ export async function writeJson(key: StorageKey, value: unknown): Promise<void> 
   } catch {
     /* A full disk must not take the app down; the next write will retry. */
   }
+}
+
+/**
+ * Keeps the newest `limit` entries of a record of answers, in place. Object keys
+ * keep their insertion order, so the first ones are the oldest. Without it a
+ * cache that learns one point per tap on the map would only ever grow, and be
+ * written back whole each time.
+ */
+export function keepNewest(record: Record<string, unknown>, limit: number): void {
+  const keys = Object.keys(record);
+  for (const key of keys.slice(0, Math.max(0, keys.length - limit))) delete record[key];
 }
 
 export async function removeKey(key: StorageKey): Promise<void> {

@@ -1,5 +1,14 @@
-export { colors, palette, neutral, accent, accent2, textAlpha } from './colors';
-export type { Colors } from './colors';
+export {
+  THEMES,
+  darkColors,
+  lightColors,
+  palette,
+  neutral,
+  accent,
+  accent2,
+  textAlpha,
+} from './colors';
+export type { ColorScheme, Colors } from './colors';
 export { fontFamily, textVariants } from './typography';
 export type { TextVariant } from './typography';
 export {

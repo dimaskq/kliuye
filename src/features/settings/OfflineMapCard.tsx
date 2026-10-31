@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useTileCache } from '@/hooks';
-import { Button, Card, Text, colors, space } from '@/ui';
+import { Button, Card, Text, space, useColors } from '@/ui';
 import { formatMegabytes } from '@/utils/format';
 
 /**
@@ -11,6 +11,7 @@ import { formatMegabytes } from '@/utils/format';
  * next time the map is opened with a connection.
  */
 export function OfflineMapCard(): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const cache = useTileCache();
 

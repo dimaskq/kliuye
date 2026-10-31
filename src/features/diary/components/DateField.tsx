@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { IconButton, Text, colors, radius, space, MIN_TOUCH_SIZE } from '@/ui';
+import { IconButton, Text, radius, space, MIN_TOUCH_SIZE, useColors } from '@/ui';
 
 export type DateFieldProps = {
   /** "Сьогодні" or "нд, 30 серпня" — the caller decides which reads better. */
@@ -21,6 +21,7 @@ export function DateField({
   nextLabel,
   onStep,
 }: DateFieldProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{

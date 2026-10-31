@@ -3,24 +3,24 @@ import type { OceanTile, TileId } from '@/domain/coast';
 import { pointKey } from '@/domain/geo';
 import type { LatLng } from '@/domain/geo';
 
-import { getBytes, getJson } from '../http';
-import { readJson, storageKeys, writeJson } from '../storage';
-import { array, object, schema, string } from '../validation';
+import { getBytes } from '../http';
+import { keepNewest, readJson, storageKeys, writeJson } from '../storage';
+import { TILEJSON_URL, vectorTileTemplate } from '../tiles/source';
 
 import { readWaterLayer } from './mvt';
 
-/**
+/*
  * The same OpenFreeMap vector tiles the map draws, so the check sends nothing
- * to a service the app does not already talk to. The TileJSON names the
- * current tile set; its tile URLs change with every planet rebuild.
+ * to a service the app does not already talk to.
  */
-export const TILEJSON_URL = 'https://tiles.openfreemap.org/planet';
+export { TILEJSON_URL };
 
 const OCEAN_CLASS = 'ocean';
 
-const tileJsonSchema = schema(object({ tiles: array(string) }));
-
 type Answers = Record<string, boolean>;
+
+/** Far more points than anyone keeps; the oldest answers drop out first. */
+const ANSWER_LIMIT = 400;
 
 function parseAnswers(input: unknown): Answers | undefined {
   if (typeof input !== 'object' || input === null) return undefined;
@@ -40,13 +40,6 @@ function loadAnswers(): Promise<Answers> {
 /** For tests: forget what this launch has read or learned. */
 export function resetSeaNearbyCache(): void {
   answers = undefined;
-}
-
-async function tileTemplate(signal: AbortSignal | undefined): Promise<string> {
-  const parsed = tileJsonSchema.safeParse(await getJson(TILEJSON_URL, { signal }));
-  const template = parsed.success ? parsed.data.tiles[0] : undefined;
-  if (template === undefined) throw new Error('TileJSON lists no tiles');
-  return template;
 }
 
 async function oceanTile(
@@ -82,7 +75,7 @@ export async function isSeaNearby(
   if (key in known) return known[key];
 
   try {
-    const template = await tileTemplate(signal);
+    const template = await vectorTileTemplate(signal);
     const tiles = await Promise.all(
       tilesWithin(point, SEA_REACH_KM, COAST_TILE_ZOOM).map((tile) =>
         oceanTile(template, tile, signal),
@@ -90,6 +83,7 @@ export async function isSeaNearby(
     );
     const nearby = isSeaWithinReach(point, tiles);
     known[key] = nearby;
+    keepNewest(known, ANSWER_LIMIT);
     await writeJson(storageKeys.seaNearby, known);
     return nearby;
   } catch {

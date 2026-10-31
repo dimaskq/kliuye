@@ -1,10 +1,11 @@
 import { Image, View } from 'react-native';
 
 import type { Attachment } from '@/domain/diary';
-import { Icon, colors, iconSize, radius } from '@/ui';
+import { Icon, iconSize, radius, useColors } from '@/ui';
 
 /** A clip with no still frame still has to look like a clip, not like nothing. */
 function VideoBadge({ size }: { size: number }): React.JSX.Element {
+  const colors = useColors();
   const badge = Math.round(size / 3);
   return (
     <View
@@ -20,7 +21,7 @@ function VideoBadge({ size }: { size: number }): React.JSX.Element {
         backgroundColor: colors.textAlpha[68],
       }}
     >
-      <Icon name="play" size={iconSize.inline} color={colors.bg} />
+      <Icon name="play" size={iconSize.inline} color={colors.onDeep} />
     </View>
   );
 }
@@ -32,6 +33,7 @@ export type ThumbProps = {
 
 /** One photo or clip, cropped square. */
 export function Thumb({ item, size }: ThumbProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{

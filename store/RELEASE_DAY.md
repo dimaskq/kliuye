@@ -94,10 +94,14 @@ Play Console сам веде по списку «Set up your app». Відпов
 
 ```bash
 export JAVA_HOME=$(ls -d ~/.local/share/jdk-17*) ANDROID_HOME=$HOME/Android/Sdk
+set -a; . secrets/sentry.env; set +a   # source maps → Sentry (store/SENTRY.md §4)
 npx expo prebuild --platform android --clean --no-install
 cd android && ./gradlew bundleRelease && cd ..
-cp android/app/build/outputs/bundle/release/app-release.aab ~/Desktop/Kliuye-1.0.0.aab
+cp android/app/build/outputs/bundle/release/app-release.aab ~/Desktop/Kliuye-1.3.0.aab
 ```
 
-Кожне **наступне** завантаження в Play вимагає більшого `versionCode`:
-збільш `android.versionCode` в `app.config.ts` (2, 3, …) перед збіркою.
+Кожне **наступне** завантаження в Play вимагає більшого `versionCode`. Перед
+збіркою підніми `version`, `android.versionCode` та `ios.buildNumber` в
+`app.config.ts` і `version` у `package.json`; останні: 1.3.0 / 4. У CHANGELOG
+перейменуй `[Unreleased]` на версію з датою, а реліз-ноти додай у
+[`google-play.md`](google-play.md) §5.

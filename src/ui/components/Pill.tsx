@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 
-import { colors, iconSize, radius, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { iconSize, radius, space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
@@ -17,6 +18,8 @@ export type PillProps = {
   trailingIcon?: IconName | undefined;
   /** A pill that navigates is a button, not one of a set of choices. */
   role?: 'radio' | 'button';
+  /** A small picture before the label — the fish on a species chip. */
+  leading?: React.ReactNode;
 };
 
 function PillContent({
@@ -24,10 +27,16 @@ function PillContent({
   detail,
   selected,
   trailingIcon,
-}: Pick<PillProps, 'label' | 'detail' | 'selected' | 'trailingIcon'>): React.JSX.Element {
+  leading,
+}: Pick<
+  PillProps,
+  'label' | 'detail' | 'selected' | 'trailingIcon' | 'leading'
+>): React.JSX.Element {
+  const colors = useColors();
   const tint = selected ? colors.onAccent : colors.text;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+      {leading}
       <Text variant="pill" color={tint}>
         {label}
       </Text>
@@ -56,7 +65,9 @@ export function Pill({
   accessibilityLabel,
   trailingIcon,
   role = 'radio',
+  leading,
 }: PillProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole={role}
@@ -76,7 +87,13 @@ export function Pill({
         opacity: pressed ? 0.8 : 1,
       })}
     >
-      <PillContent label={label} detail={detail} selected={selected} trailingIcon={trailingIcon} />
+      <PillContent
+        label={label}
+        detail={detail}
+        selected={selected}
+        trailingIcon={trailingIcon}
+        leading={leading}
+      />
     </Pressable>
   );
 }

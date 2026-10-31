@@ -6,6 +6,8 @@ import { Platform } from 'react-native';
 import { makeCatchId } from '@/domain/diary';
 import type { Attachment, MediaKind } from '@/domain/diary';
 
+import { persistableImage } from './stillImage';
+
 const FOLDER = 'catches';
 /** Kept apart from the journal's folder, whose orphans get pruned. */
 const PROFILE_FOLDER = 'profile';
@@ -13,8 +15,12 @@ const PROFILE_FOLDER = 'profile';
 const POSTER_AT_MS = 1000;
 const IMAGE_QUALITY = 0.8;
 
-/** Web has no app-owned storage here; the browser preview keeps the blob URI. */
+/** Web has no app-owned folder; the browser preview keeps the picture inline instead. */
 const isWeb = Platform.OS === 'web';
+/** Big enough for the full-screen viewer, small enough for browser storage. */
+const WEB_PHOTO_SIDE = 1280;
+const WEB_AVATAR_SIDE = 512;
+const VIDEO_FILE = /\.(mp4|mov|m4v|webm|3gp)$/i;
 
 function folder(name: string = FOLDER): Directory {
   const dir = new Directory(Paths.document, name);
@@ -27,10 +33,15 @@ function folder(name: string = FOLDER): Directory {
  * moment, into the app's own documents directory.
  */
 async function keep(sourceUri: string, name: string, into?: string): Promise<string> {
-  if (isWeb) return sourceUri;
+  /* A clip cannot be inlined; in the preview it lasts until the page reloads. */
+  if (isWeb) return VIDEO_FILE.test(name) ? sourceUri : persistableImage(sourceUri, side(into));
   const target = new File(folder(into), name);
   await new File(sourceUri).copy(target);
   return target.uri;
+}
+
+function side(into: string | undefined): number {
+  return into === PROFILE_FOLDER ? WEB_AVATAR_SIDE : WEB_PHOTO_SIDE;
 }
 
 function extensionOf(uri: string, fallback: string): string {

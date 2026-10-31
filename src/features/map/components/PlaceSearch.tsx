@@ -1,10 +1,20 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import type { CustomPoint } from '@/domain/spots';
 import type { Place } from '@/services/geocoding';
-import { Button, Card, Icon, TextField, Text, colors, iconSize, space, MIN_TOUCH_SIZE } from '@/ui';
+import {
+  Button,
+  Card,
+  Icon,
+  TextField,
+  Text,
+  iconSize,
+  screenPadding,
+  space,
+  MIN_TOUCH_SIZE,
+  useColors,
+} from '@/ui';
 
 import { useFindPlace, usePlaceSearch } from '../usePlaceSearch';
 
@@ -12,11 +22,15 @@ export type PlaceSearchProps = {
   onPick: (point: CustomPoint) => void;
 };
 
+/** Above the pins, the hint and the point actions. */
+const RESULTS_Z = 2000;
+
 function toPoint(place: Place): CustomPoint {
   return { ...place.coordinates, label: place.name };
 }
 
 function PlaceRow({ place, onPick }: { place: Place; onPick: PlaceSearchProps['onPick'] }) {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -43,6 +57,7 @@ function PlaceRow({ place, onPick }: { place: Place; onPick: PlaceSearchProps['o
 }
 
 function Notice({ text }: { text: string }): React.JSX.Element {
+  const colors = useColors();
   return (
     <Card radiusToken="tipCard" elevated style={{ padding: space.xxl }}>
       <Text variant="metaSm" color={colors.textAlpha[60]}>
@@ -73,43 +88,64 @@ function Results({
   );
 }
 
-/**
- * Find a settlement anywhere in the world and forecast for it. Results open as
- * a drop-down over whatever sits below, so the map does not jump.
- */
-export function PlaceSearch({ onPick }: PlaceSearchProps): React.JSX.Element {
-  const { t } = useTranslation();
-  const [query, setQuery] = useState('');
-  const findPlace = useFindPlace();
+export type PlaceResultsProps = { query: string } & PlaceSearchProps;
 
-  const pick = (point: CustomPoint): void => {
-    setQuery('');
-    onPick(point);
-  };
+/**
+ * The drop-down of matches. It is drawn inside the map's own frame, over the
+ * map, rather than hanging off the search field: Android hands a touch only to
+ * views inside their parent's bounds, so a list spilling out of the header let
+ * a tap on a town fall through to the map and drop a pin beneath it.
+ */
+export function PlaceResults({ query, onPick }: PlaceResultsProps): React.JSX.Element | null {
+  if (query.trim() === '') return null;
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        top: space.md,
+        left: screenPadding.standard.paddingHorizontal,
+        right: screenPadding.standard.paddingHorizontal,
+        zIndex: RESULTS_Z,
+        elevation: RESULTS_Z,
+      }}
+    >
+      <Results query={query} onPick={onPick} />
+    </View>
+  );
+}
+
+export type PlaceSearchFieldProps = {
+  query: string;
+  onChange: (query: string) => void;
+} & PlaceSearchProps;
+
+/** Find a settlement anywhere in the world and forecast for it. */
+export function PlaceSearchField({
+  query,
+  onChange,
+  onPick,
+}: PlaceSearchFieldProps): React.JSX.Element {
+  const { t } = useTranslation();
+  const findPlace = useFindPlace();
 
   const find = (): void => {
     void findPlace(query).then((place) => {
-      if (place !== undefined) pick(toPoint(place));
+      if (place !== undefined) onPick(toPoint(place));
     });
   };
 
   return (
-    <View style={{ zIndex: 10, elevation: 10 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <View style={{ flex: 1 }}>
-          <TextField
-            value={query}
-            placeholder={t('map.searchPlaceholder')}
-            accessibilityLabel={t('map.searchLabel')}
-            onChange={setQuery}
-            onSubmit={find}
-          />
-        </View>
-        <Button label={t('map.searchButton')} onPress={find} />
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+      <View style={{ flex: 1 }}>
+        <TextField
+          value={query}
+          placeholder={t('map.searchPlaceholder')}
+          accessibilityLabel={t('map.searchLabel')}
+          onChange={onChange}
+          onSubmit={find}
+        />
       </View>
-      <View style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: space.md }}>
-        <Results query={query} onPick={pick} />
-      </View>
+      <Button label={t('map.searchButton')} onPress={find} />
     </View>
   );
 }

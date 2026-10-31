@@ -10,10 +10,12 @@ import Animated, {
 import { useReduceMotion } from '@/hooks/useReduceMotion';
 
 import { clampForDisplay, scoreFill } from '../scoreColor';
-import { colors, motion, radius, sizes } from '../tokens';
+import { useColors } from '../theme';
+import { motion, radius, sizes } from '../tokens';
 
 /** Horizontal index bar used in the week list. Decorative: the row is labelled. */
 export function ProgressTrack({ value }: { value: number }): React.JSX.Element {
+  const colors = useColors();
   const reduceMotion = useReduceMotion();
   const shown = clampForDisplay(value);
   const width = useSharedValue(0);

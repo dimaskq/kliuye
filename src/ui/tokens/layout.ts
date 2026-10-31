@@ -118,6 +118,12 @@ export const motion = {
   /** A status pill gliding in and out: slow enough to be followed. */
   toastIn: 320,
   toastOut: 260,
+  /** The lit window gliding from one part of the screen to the next. */
+  spotlight: 420,
+  /** A tour step's words rising into place. */
+  stepIn: 320,
+  /** One slow breath of the ring around a lit target, each way. */
+  pulse: 1100,
 } as const;
 
 export const ICON_STROKE_WIDTH = 2.75;

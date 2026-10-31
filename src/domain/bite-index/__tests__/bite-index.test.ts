@@ -141,6 +141,24 @@ describe('bite seasons', () => {
   });
 });
 
+describe('freshwater fish out at sea', () => {
+  const offshore = { month: 7, seaNearby: true, freshwaterNearby: false } as const;
+
+  it.each(speciesOf('freshwater'))('rules %s out with an index of 0', (species) => {
+    const score = computeBiteScore(makeBiteInputs({ ...offshore, species }));
+    expect(score.value).toBe(0);
+    expect(score.ruledOut).toBe('noFreshwater');
+  });
+
+  it.each(speciesOf('sea'))('leaves %s to the weather', (species) => {
+    expect(ruledOutFor({ species, ...offshore })).not.toBe('noFreshwater');
+  });
+
+  it('rules nothing out while the water check has no answer', () => {
+    expect(ruledOutFor({ species: 'carp', month: 7, freshwaterNearby: undefined })).toBeUndefined();
+  });
+});
+
 describe('sea fish far from the sea', () => {
   const inland = { month: 7, seaNearby: false } as const;
 

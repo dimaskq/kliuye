@@ -10,7 +10,16 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useReduceMotion } from '@/hooks/useReduceMotion';
-import { Icon, IconButton, Text, colors, iconSize, space, MIN_TOUCH_SIZE } from '@/ui';
+import {
+  Icon,
+  IconButton,
+  SpotlightTarget,
+  Text,
+  iconSize,
+  space,
+  MIN_TOUCH_SIZE,
+  useColors,
+} from '@/ui';
 
 export type LocationHeaderProps = {
   spotName: string;
@@ -30,8 +39,6 @@ export type LocationHeaderProps = {
 };
 
 const SPIN_MS = 900;
-
-const HEADER_BUTTON = { background: colors.surface } as const;
 
 /** Turns while the forecast reloads; with reduced motion it only dims. */
 function RefreshIcon({ spinning }: { spinning: boolean }): React.JSX.Element {
@@ -68,6 +75,8 @@ type ActionsProps = Pick<
 >;
 
 function HeaderActions(props: ActionsProps): React.JSX.Element {
+  const colors = useColors();
+  const HEADER_BUTTON = { background: colors.surface } as const;
   return (
     <View style={{ flexDirection: 'row', gap: space.md }}>
       <IconButton
@@ -79,12 +88,14 @@ function HeaderActions(props: ActionsProps): React.JSX.Element {
       >
         <RefreshIcon spinning={props.refreshing} />
       </IconButton>
-      <IconButton
-        {...HEADER_BUTTON}
-        icon="list"
-        label={props.placesLabel}
-        onPress={props.onOpenPlaces}
-      />
+      <SpotlightTarget id="today.places">
+        <IconButton
+          {...HEADER_BUTTON}
+          icon="list"
+          label={props.placesLabel}
+          onPress={props.onOpenPlaces}
+        />
+      </SpotlightTarget>
       <IconButton
         {...HEADER_BUTTON}
         icon="settings"
@@ -102,6 +113,7 @@ export function LocationHeader({
   onChangeSpot,
   ...actions
 }: LocationHeaderProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{
@@ -111,28 +123,26 @@ export function LocationHeader({
         gap: space.xl,
       }}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={spotName}
-        accessibilityHint={changeHint}
-        onPress={onChangeSpot}
-        style={({ pressed }) => ({
-          flex: 1,
-          minHeight: MIN_TOUCH_SIZE,
-          opacity: pressed ? 0.7 : 1,
-        })}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-          <Icon name="map-pin" size={iconSize.header} color={colors.accent} />
-          <Text variant="title" numberOfLines={1} style={{ flexShrink: 1 }}>
-            {spotName}
+      <SpotlightTarget id="today.place" style={{ flex: 1 }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={spotName}
+          accessibilityHint={changeHint}
+          onPress={onChangeSpot}
+          style={({ pressed }) => ({ minHeight: MIN_TOUCH_SIZE, opacity: pressed ? 0.7 : 1 })}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+            <Icon name="map-pin" size={iconSize.header} color={colors.accent} />
+            <Text variant="title" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {spotName}
+            </Text>
+            <Icon name="chevron-right" size={iconSize.inline} color={colors.textAlpha[35]} />
+          </View>
+          <Text variant="meta" color={colors.textAlpha[55]} style={{ marginTop: 3 }}>
+            {subtitle}
           </Text>
-          <Icon name="chevron-right" size={iconSize.inline} color={colors.textAlpha[35]} />
-        </View>
-        <Text variant="meta" color={colors.textAlpha[55]} style={{ marginTop: 3 }}>
-          {subtitle}
-        </Text>
-      </Pressable>
+        </Pressable>
+      </SpotlightTarget>
       <HeaderActions {...actions} />
     </View>
   );

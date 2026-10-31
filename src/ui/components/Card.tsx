@@ -1,7 +1,9 @@
 import { View } from 'react-native';
 import type { StyleProp, ViewProps, ViewStyle } from 'react-native';
 
-import { colors, radius, shadows } from '../tokens';
+import { useColors } from '../theme';
+import { radius, shadows } from '../tokens';
+import type { Colors } from '../tokens';
 
 type CardTone = 'surface' | 'dark' | 'accent' | 'blaze';
 
@@ -12,12 +14,14 @@ export type CardProps = ViewProps & {
   style?: StyleProp<ViewStyle>;
 };
 
-const TONE_BACKGROUND: Record<CardTone, string> = {
-  surface: colors.surface,
-  dark: colors.accent2800,
-  accent: colors.accent100,
-  blaze: colors.accent,
-};
+function backgroundOf(colors: Colors, tone: CardTone): string {
+  return {
+    surface: colors.surface,
+    dark: colors.deep,
+    accent: colors.accent100,
+    blaze: colors.accent,
+  }[tone];
+}
 
 /** A rounded panel — the recurring container of every screen. */
 export function Card({
@@ -27,12 +31,13 @@ export function Card({
   style,
   ...rest
 }: CardProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       {...rest}
       style={[
         {
-          backgroundColor: TONE_BACKGROUND[tone],
+          backgroundColor: backgroundOf(colors, tone),
           borderRadius: radius[radiusToken],
           overflow: 'hidden',
         },

@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { colors, radius, sizes } from '../tokens';
+import { useColors } from '../theme';
+import { radius, sizes } from '../tokens';
 
 import { Text } from './Text';
 
@@ -16,6 +17,7 @@ export function ScoreBadge({
   selected,
   size = sizes.spotBadge,
 }: ScoreBadgeProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{

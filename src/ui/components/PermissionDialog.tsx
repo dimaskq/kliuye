@@ -1,6 +1,7 @@
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 
-import { colors, iconSize, radius, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { iconSize, radius, space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Button } from './Button';
 import { Card } from './Card';
@@ -32,6 +33,7 @@ export type PermissionDialogProps = {
 const BADGE_SIZE = 56;
 
 function Badge(): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{
@@ -50,6 +52,7 @@ function Badge(): React.JSX.Element {
 }
 
 function Reasons({ reasons }: { reasons: readonly PermissionReason[] }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View style={{ gap: space.lg }}>
       {reasons.map((reason) => (
@@ -70,6 +73,7 @@ type ActionsProps = Pick<
 >;
 
 function Actions(props: ActionsProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View style={{ gap: space.md }}>
       <Button label={props.allowLabel} onPress={props.onAllow} style={{ alignSelf: 'stretch' }} />
@@ -112,6 +116,7 @@ export function PermissionDialog({
   privacy,
   ...actions
 }: PermissionDialogProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Modal
       visible={visible}

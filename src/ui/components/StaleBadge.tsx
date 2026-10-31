@@ -1,12 +1,14 @@
 import { View } from 'react-native';
 
-import { colors, radius, space } from '../tokens';
+import { useColors } from '../theme';
+import { radius, space } from '../tokens';
 
 import { Icon } from './Icon';
 import { Text } from './Text';
 
 /** Offline marker: cached content stays visible, its age stated openly. */
 export function StaleBadge({ label }: { label: string }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       accessibilityRole="text"

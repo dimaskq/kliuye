@@ -3,5 +3,8 @@
     "NSLocationWhenInUseUsageDescription": "За да покажем прогнозата за кълвежа за водоемите близо до вас. Можете и сами да изберете място.",
     "CFBundleDisplayName": "Kliuye",
     "NSPhotoLibraryUsageDescription": "За да добавите снимки и видео на улова си в дневника. Файловете остават на устройството."
+  },
+  "android": {
+    "app_name": "Kliuye"
   }
 }

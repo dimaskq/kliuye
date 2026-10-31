@@ -13,12 +13,16 @@ const PHOTOS_PURPOSE_EN =
   'To attach photos and video of your catch to the journal. The files stay on your device.';
 
 const config: ExpoConfig = {
-  name: 'Клює',
+  /* Latin by default: a launcher in English, German or anything else we do not
+     translate shows "Kliuye". Ukrainian gets "Клює" from its locale file, on
+     both platforms (`android.app_name`, `ios.CFBundleDisplayName`). */
+  name: 'Kliuye',
   slug: 'kliuye',
-  version: '1.1.0',
+  version: '1.3.0',
   scheme: 'kliuye',
   orientation: 'portrait',
-  userInterfaceStyle: 'light',
+  /* Light or dark, as the phone is — or as picked in Settings. */
+  userInterfaceStyle: 'automatic',
   icon: './assets/icon.png',
   assetBundlePatterns: ['**/*'],
   locales: {
@@ -30,7 +34,7 @@ const config: ExpoConfig = {
   ios: {
     bundleIdentifier: BUNDLE_ID,
     supportsTablet: false,
-    buildNumber: '2',
+    buildNumber: '4',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       NSLocationWhenInUseUsageDescription: LOCATION_PURPOSE_EN,
@@ -45,6 +49,13 @@ const config: ExpoConfig = {
        * in Apple's sense, so it is declared.
        */
       NSPrivacyCollectedDataTypes: [
+        /* Crash reports, only once the angler opts in; never linked to them. */
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCrashData',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
         {
           NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCoarseLocation',
           NSPrivacyCollectedDataTypeLinked: false,
@@ -75,7 +86,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: BUNDLE_ID,
-    versionCode: 2,
+    versionCode: 4,
     predictiveBackGestureEnabled: true,
     adaptiveIcon: {
       foregroundImage: './assets/android-icon-foreground.png',
@@ -159,7 +170,13 @@ const config: ExpoConfig = {
     ],
     [
       'expo-splash-screen',
-      { image: './assets/splash-icon.png', backgroundColor: '#f1f5ec', imageWidth: 180 },
+      {
+        image: './assets/splash-icon.png',
+        backgroundColor: '#f1f5ec',
+        imageWidth: 180,
+        /* The lake at night: no white flash before a dark-theme app. */
+        dark: { image: './assets/splash-icon.png', backgroundColor: '#0b1c21' },
+      },
     ],
     [
       'expo-location',
@@ -183,6 +200,13 @@ const config: ExpoConfig = {
     'expo-background-task',
     /* MapLibre: free, keyless maps on both platforms (OpenFreeMap tiles). */
     '@maplibre/maplibre-react-native',
+    /* Crash reports — sent only after the angler switches them on in Settings
+       (see store/SENTRY.md). With SENTRY_AUTH_TOKEN set, the release build
+       uploads its source maps, so a stack trace reads as our own files. */
+    [
+      '@sentry/react-native/expo',
+      { url: 'https://de.sentry.io/', organization: 'dem-kravchenko', project: 'react-native' },
+    ],
     /* Local release builds are signed with the Play upload key from secrets/. */
     './plugins/withReleaseSigning',
   ],

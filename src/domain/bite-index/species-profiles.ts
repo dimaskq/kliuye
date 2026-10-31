@@ -118,6 +118,20 @@ export const SPECIES_PROFILES: Readonly<Record<SpeciesId, SpeciesProfile>> = {
     activity: [NONE, NONE, POOR, GOOD, PEAK, PEAK, GOOD, GOOD, FAIR, POOR, NONE, NONE],
   },
 
+  /**
+   * Brown trout of mountain rivers and cold lakes. Best in spring and again in
+   * September; protected while it spawns in late autumn, as across the
+   * Carpathians and the Alps.
+   */
+  trout: {
+    habitat: 'freshwater',
+    optimalWaterC: [8, 16],
+    waterToleranceC: 6,
+    windToleranceMs: 6,
+    pressureSensitivity: 0.6,
+    dielAmplitude: 0.7,
+    activity: [POOR, POOR, GOOD, PEAK, PEAK, GOOD, FAIR, FAIR, GOOD, POOR, NONE, NONE],
+  },
   ...SEA_PROFILES,
 };
 

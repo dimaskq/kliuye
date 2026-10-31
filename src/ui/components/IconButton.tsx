@@ -1,7 +1,8 @@
 import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 
-import { colors, iconSize, radius, sizes, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { iconSize, radius, sizes, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
@@ -49,7 +50,7 @@ export function IconButton({
   onPress,
   size = sizes.iconButton,
   glyphSize = iconSize.action,
-  color = colors.text,
+  color: colorProp,
   background = 'transparent',
   strokeWidth,
   disabled = false,
@@ -58,6 +59,8 @@ export function IconButton({
   style,
   children,
 }: IconButtonProps): React.JSX.Element {
+  const colors = useColors();
+  const color = colorProp ?? colors.text;
   const inactive = disabled || busy;
   return (
     <Pressable

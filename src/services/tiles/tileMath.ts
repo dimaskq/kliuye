@@ -2,19 +2,16 @@ import type { LatLng } from '@/domain/geo';
 
 export type Tile = { z: number; x: number; y: number };
 
-/**
- * OpenStreetMap's own tiles: no key, no billing, and the same source the web
- * preview already uses — at the cost of the attribution shown on the map.
- */
-export const TILE_URL_TEMPLATE = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
 /** The browser preview's tile store; the phone keeps its own on disk. */
 export const TILE_CACHE_NAME = 'kliuye-tiles-v1';
 
-/** Country level down to "which bay of the reservoir" — the zooms the app uses. */
+/**
+ * Country level down to "which bay of the reservoir". Vector tiles stay sharp
+ * when MapLibre draws them past their own zoom, so 13 is deep enough to stand on
+ * the bank.
+ */
 export const TILE_MIN_ZOOM = 8;
 export const TILE_MAX_ZOOM = 13;
-export const TILE_SIZE = 256;
 
 /** A morning's drive around the point, which is what "this area" means here. */
 export const AREA_RADIUS_KM = 12;
@@ -46,10 +43,9 @@ export function tileY(latitude: number, zoom: number): number {
   return clamp(Math.floor(projected * count), 0, count - 1);
 }
 
-export function tileUrl({ z, x, y }: Tile): string {
-  return TILE_URL_TEMPLATE.replace('{z}', String(z))
-    .replace('{x}', String(x))
-    .replace('{y}', String(y));
+/** Fills a `{z}/{x}/{y}` template, as TileJSON and map styles write them. */
+export function tileUrl(template: string, { z, x, y }: Tile): string {
+  return template.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y));
 }
 
 type Bounds = { north: number; south: number; west: number; east: number };

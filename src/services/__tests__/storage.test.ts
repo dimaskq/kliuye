@@ -1,6 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { migrateStorage, readJson, removeKey, storageKeys, writeJson } from '../storage';
+import {
+  keepNewest,
+  migrateStorage,
+  readJson,
+  removeKey,
+  storageKeys,
+  writeJson,
+} from '../storage';
 
 type Stored = { language: string };
 
@@ -62,5 +69,15 @@ describe('storage', () => {
     await expect(writeJson(storageKeys.spots, [])).resolves.toBeUndefined();
     await expect(removeKey(storageKeys.spots)).resolves.toBeUndefined();
     await expect(migrateStorage()).resolves.toBeUndefined();
+  });
+});
+
+describe('keepNewest', () => {
+  it('drops the oldest answers past the limit and keeps a small record whole', () => {
+    const record: Record<string, number> = { a: 1, b: 2, c: 3, d: 4 };
+    keepNewest(record, 2);
+    expect(record).toEqual({ c: 3, d: 4 });
+    keepNewest(record, 10);
+    expect(record).toEqual({ c: 3, d: 4 });
   });
 });

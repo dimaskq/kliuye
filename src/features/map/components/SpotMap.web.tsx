@@ -5,28 +5,27 @@ import { useTranslation } from 'react-i18next';
 
 import type { LatLng } from '@/domain/geo';
 import { CUSTOM_SPOT_ID } from '@/domain/spots';
-import { TILE_URL_TEMPLATE } from '@/services/tiles';
-import { colors } from '@/ui';
+import { usePreferences } from '@/store';
+import { useColors } from '@/ui';
+import type { Colors } from '@/ui';
 
 import type { ScoredSpot } from '../useSpotScores';
 
-import { cachedTileLayer } from './cachedTiles.web';
 import { PIN, pinStyle, pinSvgMarkup } from './pinShape';
 import type { SpotMapProps } from './SpotMap';
+import { useTileLayer } from './tileLayers.web';
 
 const ZOOM = 9;
 const FOCUS_ZOOM = 14;
 const USER_DOT_RADIUS = 7;
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-const MAX_ZOOM = 18;
 
-function pinIcon(spot: ScoredSpot, selected: boolean): L.DivIcon {
+function pinIcon(spot: ScoredSpot, selected: boolean, colors: Colors): L.DivIcon {
   return L.divIcon({
     className: '',
     iconSize: [PIN.width, PIN.height],
     /* The tip, not the centre, sits on the coordinate. */
     iconAnchor: [PIN.width / 2, PIN.height],
-    html: pinSvgMarkup(spot.value, pinStyle(selected, spot.id === CUSTOM_SPOT_ID)),
+    html: pinSvgMarkup(spot.value, pinStyle(selected, spot.id === CUSTOM_SPOT_ID, colors)),
   });
 }
 
@@ -46,6 +45,7 @@ function useHandlers(onSelect: (id: string) => void, onPickPoint: (c: LatLng) =>
 
 /** The angler's own position: the browser's answer to the native blue dot. */
 function useUserDot(map: React.RefObject<L.Map | null>, userLocation: LatLng | undefined): void {
+  const colors = useColors();
   const { t } = useTranslation();
   const dot = useRef<L.CircleMarker | null>(null);
 
@@ -73,7 +73,7 @@ function useUserDot(map: React.RefObject<L.Map | null>, userLocation: LatLng | u
       return;
     }
     dot.current.setLatLng(position);
-  }, [map, t, userLocation]);
+  }, [colors, map, t, userLocation]);
 }
 
 function useLeafletMap(handlers: React.RefObject<Handlers>) {
@@ -84,9 +84,6 @@ function useLeafletMap(handlers: React.RefObject<Handlers>) {
     if (container.current === null || map.current !== null) return;
     const element = container.current;
     const instance = L.map(element).setView([0, 0], ZOOM);
-    cachedTileLayer(TILE_URL_TEMPLATE, { attribution: ATTRIBUTION, maxZoom: MAX_ZOOM }).addTo(
-      instance,
-    );
     /* Leaflet caches the viewport size; resizing the sheet has to tell it. */
     const observer = new ResizeObserver(() => instance.invalidateSize());
     observer.observe(element);
@@ -133,8 +130,13 @@ export function SpotMap({
   userLocation,
   focusRequest = 0,
 }: SpotMapProps): React.JSX.Element {
+  const colors = useColors();
   const handlers = useHandlers(onSelect, onPickPoint);
   const { container, map } = useLeafletMap(handlers);
+  useTileLayer(
+    map,
+    usePreferences((state) => state.mapLayer),
+  );
   useUserDot(map, userLocation);
   const markers = useRef(new Map<string, L.Marker>());
   const dragging = useRef(false);
@@ -146,7 +148,7 @@ export function SpotMap({
 
     for (const spot of spots) {
       const position: L.LatLngExpression = [spot.coordinates.latitude, spot.coordinates.longitude];
-      const icon = pinIcon(spot, spot.id === selectedId);
+      const icon = pinIcon(spot, spot.id === selectedId, colors);
       const existing = markers.current.get(spot.id);
       if (existing !== undefined) {
         existing.setIcon(icon);
@@ -166,7 +168,7 @@ export function SpotMap({
       marker.remove();
       markers.current.delete(id);
     }
-  }, [handlers, map, selectedId, spots]);
+  }, [colors, handlers, map, selectedId, spots]);
 
   useEffect(() => {
     if (centre === undefined || dragging.current) return;

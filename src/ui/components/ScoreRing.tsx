@@ -11,7 +11,8 @@ import Svg, { Circle } from 'react-native-svg';
 import { useReduceMotion } from '@/hooks/useReduceMotion';
 
 import { clampForDisplay, scoreFill } from '../scoreColor';
-import { colors, motion, sizes } from '../tokens';
+import { useColors } from '../theme';
+import { motion, sizes } from '../tokens';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -36,8 +37,10 @@ export type ScoreRingProps = {
 export function ScoreRing({
   value,
   children,
-  trackColor = colors.textAlpha[10],
+  trackColor: trackColorProp,
 }: ScoreRingProps): React.JSX.Element {
+  const colors = useColors();
+  const trackColor = trackColorProp ?? colors.textAlpha[10];
   const reduceMotion = useReduceMotion();
   const shown = clampForDisplay(value);
   const target = sizes.ringCircumference * (1 - shown / 100);

@@ -2,10 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { coldLowlandAt, freshRegionAt, seaRegionAt } from '@/domain/bite-index';
 import type { SpeciesId } from '@/domain/bite-index';
 import { useCurrentForecast } from '@/hooks';
 import { useSelection } from '@/store';
-import { Screen, SectionHeader, Text, colors, space } from '@/ui';
+import { Screen, SectionHeader, Text, space, useColors } from '@/ui';
 
 import { SpeciesRow } from './components';
 import { speciesGroups } from './speciesRows';
@@ -41,6 +42,7 @@ function Group({ group, selected, metaOf, onChoose }: GroupProps): React.JSX.Ele
           return (
             <SpeciesRow
               key={row.id}
+              species={row.id}
               name={name}
               meta={meta}
               value={row.value}
@@ -57,12 +59,13 @@ function Group({ group, selected, metaOf, onChoose }: GroupProps): React.JSX.Ele
 
 /** Every species the app knows, grouped by where it is fished. */
 export function SpeciesScreen(): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const router = useRouter();
   const metaOf = useRowMeta();
   const speciesId = useSelection((state) => state.speciesId);
   const setSpecies = useSelection((state) => state.setSpecies);
-  const { model, forecast } = useCurrentForecast();
+  const { model, forecast, spot } = useCurrentForecast();
   const scores = useSpeciesScores();
 
   /* The catalogue is opened over Today, so a choice dismisses back down to it.
@@ -81,11 +84,22 @@ export function SpeciesScreen(): React.JSX.Element {
         <Text variant="emphasis" color={colors.textAlpha[55]}>
           {t('speciesPicker.subtitle')}
         </Text>
+        <Text variant="metaSm" color={colors.textAlpha[55]} style={{ marginTop: space.sm }}>
+          {t('howItWorks.speciesNote')}
+        </Text>
       </View>
       {speciesGroups(
         scores,
         model?.today.month ?? new Date().getMonth() + 1,
         forecast?.seaNearby,
+        forecast?.freshwaterNearby,
+        {
+          seaRegion: seaRegionAt(spot.coordinates),
+          freshRegion: freshRegionAt(spot.coordinates),
+          coldLowland: coldLowlandAt(spot.coordinates),
+          located: true,
+          elevationM: forecast?.elevationM,
+        },
       ).map((group) => (
         <Group
           key={group.habitat}

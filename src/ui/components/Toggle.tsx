@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 
-import { colors, radius, shadows, sizes, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { radius, shadows, sizes, space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Text } from './Text';
 
@@ -13,6 +14,7 @@ export type ToggleProps = {
 
 /** Settings row with a switch; the whole row is the target, not just the track. */
 export function Toggle({ label, hint, value, onChange }: ToggleProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="switch"

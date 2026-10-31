@@ -6,7 +6,12 @@ import {
   ruledOutFor,
   speciesOf,
 } from '@/domain/bite-index';
-import type { Habitat, RuledOut, SpeciesId } from '@/domain/bite-index';
+import type { BiteInputs, Habitat, RuledOut, SpeciesId } from '@/domain/bite-index';
+
+type RuledOutInputs = Pick<
+  BiteInputs,
+  'seaRegion' | 'freshRegion' | 'located' | 'elevationM' | 'coldLowland'
+>;
 
 export type SpeciesRow = {
   id: SpeciesId;
@@ -33,6 +38,10 @@ export function speciesGroups(
   month: number,
   /** Whether the spot has sea within reach; `undefined` rules nothing out. */
   seaNearby?: boolean,
+  /** Whether the spot is on fresh water; `undefined` rules nothing out. */
+  freshwaterNearby?: boolean,
+  /** Where the spot is and how high: which fish can be there at all. */
+  place: RuledOutInputs = {},
 ): SpeciesGroup[] {
   return HABITATS.map((habitat) => ({
     habitat,
@@ -43,7 +52,7 @@ export function speciesGroups(
         value: scores[id],
         optimum: profile.optimalWaterC,
         inSeason: activityIn(profile.activity, month) >= IN_SEASON_FROM,
-        ruledOut: ruledOutFor({ species: id, month, seaNearby }),
+        ruledOut: ruledOutFor({ species: id, month, seaNearby, freshwaterNearby, ...place }),
       };
     }),
   })).filter((group) => group.rows.length > 0);

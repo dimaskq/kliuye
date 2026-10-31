@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 import type { LatLng } from '@/domain/geo';
 import { openDirections } from '@/services/directions';
 import type { TravelMode } from '@/services/directions';
-import { Dialog, Icon, Text, colors, iconSize, radius, space } from '@/ui';
+import { Dialog, Icon, Text, iconSize, radius, space, useColors } from '@/ui';
 import type { IconName } from '@/ui';
 
 export type RouteDialogProps = {
@@ -24,6 +24,7 @@ type ModeButtonProps = {
 };
 
 function ModeButton({ icon, label, accessibilityLabel, onPress }: ModeButtonProps) {
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -56,6 +57,7 @@ export function RouteDialog({
   name,
   onClose,
 }: RouteDialogProps): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
 

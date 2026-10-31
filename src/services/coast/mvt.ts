@@ -1,9 +1,15 @@
 import type { Polygon } from '@/domain/coast';
 
+import { decodeLines, decodePolygons } from './geometry';
+import type { Line } from './geometry';
+
+export type { Line } from './geometry';
+
 /**
- * Just enough of the Mapbox Vector Tile format (protobuf, spec v2) to read the
- * sea: the `water` layer, its `class` field and its polygon outlines. Every
- * other layer is skipped without being decoded.
+ * Just enough of the Mapbox Vector Tile format (protobuf, spec v2) to read
+ * water: the `water` layer with its `class` field and polygon outlines, and the
+ * `waterway` layer's river and stream lines. Every other layer is skipped
+ * without being decoded.
  */
 
 export type WaterFeature = {
@@ -16,8 +22,15 @@ export type WaterLayer = {
   features: WaterFeature[];
 };
 
+export type WaterwayLayer = {
+  extent: number;
+  lines: Line[];
+};
+
 const WATER_LAYER = 'water';
+const WATERWAY_LAYER = 'waterway';
 const DEFAULT_EXTENT = 4096;
+const LINESTRING = 2;
 const POLYGON = 3;
 
 /* Protobuf wire types. */
@@ -25,11 +38,6 @@ const VARINT = 0;
 const FIXED64 = 1;
 const LENGTH_DELIMITED = 2;
 const FIXED32 = 5;
-
-/* Geometry commands. */
-const MOVE_TO = 1;
-const LINE_TO = 2;
-const CLOSE_PATH = 7;
 
 class Reader {
   position = 0;
@@ -92,59 +100,6 @@ class Reader {
   }
 }
 
-function zigzag(value: number): number {
-  return value % 2 === 0 ? value / 2 : -(value + 1) / 2;
-}
-
-/** Closes a ring and files it: an outer ring opens a polygon, anything else is its hole. */
-function closeRing(ring: [number, number][], polygons: [number, number][][][]): void {
-  if (ring.length === 0) return;
-  ring.push(ring[0]!);
-  if (signedArea(ring) > 0 || polygons.length === 0) polygons.push([ring]);
-  else polygons.at(-1)!.push(ring);
-}
-
-/**
- * Turns the command stream into rings. A new outer ring — positive area in the
- * tile's y-down grid — starts a new polygon; the rings after it are its holes.
- */
-function decodePolygons(geometry: readonly number[]): Polygon[] {
-  const polygons: [number, number][][][] = [];
-  let ring: [number, number][] = [];
-  let x = 0;
-  let y = 0;
-  let i = 0;
-
-  while (i < geometry.length) {
-    const command = geometry[i]! & 0x7;
-    const count = geometry[i]! >> 3;
-    i += 1;
-    if (command === CLOSE_PATH) {
-      closeRing(ring, polygons);
-      ring = [];
-      continue;
-    }
-    for (let n = 0; n < count; n += 1) {
-      x += zigzag(geometry[i]!);
-      y += zigzag(geometry[i + 1]!);
-      i += 2;
-      if (command === MOVE_TO) ring = [[x, y]];
-      else if (command === LINE_TO) ring.push([x, y]);
-    }
-  }
-  return polygons;
-}
-
-function signedArea(ring: readonly (readonly [number, number])[]): number {
-  let sum = 0;
-  for (let i = 1; i < ring.length; i += 1) {
-    const [ax, ay] = ring[i - 1]!;
-    const [bx, by] = ring[i]!;
-    sum += ax * by - bx * ay;
-  }
-  return sum / 2;
-}
-
 type RawFeature = { type: number; tags: number[]; geometry: number[] };
 
 function readFeature(reader: Reader, end: number): RawFeature {
@@ -182,7 +137,13 @@ function layerName(reader: Reader, end: number): string {
   return name;
 }
 
-function readLayer(reader: Reader, end: number): WaterLayer {
+type RawLayer = {
+  extent: number;
+  classOf: (feature: RawFeature) => string | undefined;
+  raw: RawFeature[];
+};
+
+function readRawLayer(reader: Reader, end: number): RawLayer {
   let extent = DEFAULT_EXTENT;
   const keys: string[] = [];
   const values: (string | undefined)[] = [];
@@ -203,17 +164,34 @@ function readLayer(reader: Reader, end: number): WaterLayer {
   }
 
   const classKey = keys.indexOf('class');
-  const features = raw
-    .filter((feature) => feature.type === POLYGON)
-    .map((feature) => {
-      let className: string | undefined;
-      for (let i = 0; i + 1 < feature.tags.length; i += 2) {
-        if (feature.tags[i] === classKey) className = values[feature.tags[i + 1]!];
-      }
-      return { className, polygons: decodePolygons(feature.geometry) };
-    });
+  const classOf = (feature: RawFeature): string | undefined => {
+    let className: string | undefined;
+    for (let i = 0; i + 1 < feature.tags.length; i += 2) {
+      if (feature.tags[i] === classKey) className = values[feature.tags[i + 1]!];
+    }
+    return className;
+  };
 
-  return { extent, features };
+  return { extent, classOf, raw };
+}
+
+/** The named layer, undecoded, or `undefined` when the tile has none. */
+function findLayer(bytes: Uint8Array, name: string): RawLayer | undefined {
+  const reader = new Reader(bytes);
+  while (!reader.done) {
+    const tag = reader.varint();
+    if (Math.floor(tag / 8) === 3 && (tag & 0x7) === LENGTH_DELIMITED) {
+      const end = reader.end();
+      const start = reader.position;
+      if (layerName(reader, end) === name) {
+        reader.position = start;
+        return readRawLayer(reader, end);
+      }
+    } else {
+      reader.skip(tag & 0x7);
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -222,19 +200,31 @@ function readLayer(reader: Reader, end: number): WaterLayer {
  * @throws Error on a malformed tile.
  */
 export function readWaterLayer(bytes: Uint8Array): WaterLayer | undefined {
-  const reader = new Reader(bytes);
-  while (!reader.done) {
-    const tag = reader.varint();
-    if (Math.floor(tag / 8) === 3 && (tag & 0x7) === LENGTH_DELIMITED) {
-      const end = reader.end();
-      const start = reader.position;
-      if (layerName(reader, end) === WATER_LAYER) {
-        reader.position = start;
-        return readLayer(reader, end);
-      }
-    } else {
-      reader.skip(tag & 0x7);
-    }
-  }
-  return undefined;
+  const layer = findLayer(bytes, WATER_LAYER);
+  if (layer === undefined) return undefined;
+  return {
+    extent: layer.extent,
+    features: layer.raw
+      .filter((feature) => feature.type === POLYGON)
+      .map((feature) => ({
+        className: layer.classOf(feature),
+        polygons: decodePolygons(feature.geometry),
+      })),
+  };
+}
+
+/**
+ * The tile's rivers, canals and streams as lines, or `undefined` when it has
+ * none. Narrow water is drawn only this way, never as a polygon.
+ * @throws Error on a malformed tile.
+ */
+export function readWaterwayLayer(bytes: Uint8Array): WaterwayLayer | undefined {
+  const layer = findLayer(bytes, WATERWAY_LAYER);
+  if (layer === undefined) return undefined;
+  return {
+    extent: layer.extent,
+    lines: layer.raw
+      .filter((feature) => feature.type === LINESTRING)
+      .flatMap((feature) => decodeLines(feature.geometry)),
+  };
 }

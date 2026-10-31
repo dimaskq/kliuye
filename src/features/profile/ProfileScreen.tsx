@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { SPOTS } from '@/domain/spots';
+import { ThemeSection } from '@/features/settings';
 import { useCurrentForecast, useLanguageLabels, useSettingsRows } from '@/hooks';
 import { initialsOf, useAngler, usePreferences } from '@/store';
 import {
@@ -13,18 +14,19 @@ import {
   SectionHeader,
   SettingsList,
   Text,
-  colors,
   sizes,
   space,
+  useColors,
 } from '@/ui';
 
-import { Avatar, EditProfileDialog, ProCard, StatTiles } from './components';
+import { Avatar, EditProfileDialog, StatTiles } from './components';
 import { useAnglerSummary } from './useAnglerSummary';
 import { useProfileEditor } from './useProfileEditor';
 import { useProfileStats } from './useProfileStats';
 
 /** Tapping the angler opens their profile for editing. */
 function AnglerHeader({ onEdit }: { onEdit: () => void }): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const displayName = useAngler((state) => state.displayName);
   const avatarUri = useAngler((state) => state.avatarUri);
@@ -88,11 +90,7 @@ export function ProfileScreen(): React.JSX.Element {
         <SectionHeader title={t('profile.language')} />
         <LanguagePicker selected={language} labels={labels} onSelect={setLanguage} />
       </View>
-      <ProCard
-        title={t('profile.proTitle')}
-        body={t('profile.proBody')}
-        soonLabel={t('profile.proSoon')}
-      />
+      <ThemeSection />
       <Card
         radiusToken="tipCard"
         style={{ paddingVertical: space.sm, paddingHorizontal: space.xs }}

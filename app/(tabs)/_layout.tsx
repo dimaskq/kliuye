@@ -4,7 +4,8 @@ import { View } from 'react-native';
 
 import { useBiteAlerts } from '@/features/alerts';
 import { OfflineNotice } from '@/features/offline';
-import { TabBar, colors } from '@/ui';
+import { OnboardingTour } from '@/features/onboarding';
+import { TabBar, useColors } from '@/ui';
 import type { IconName } from '@/ui';
 
 /** Tabs are data: the order and icons live here, the chrome lives in `TabBar`. */
@@ -24,6 +25,7 @@ function BiteAlerts(): null {
 }
 
 export default function TabsLayout() {
+  const colors = useColors();
   const { t } = useTranslation();
 
   return (
@@ -52,6 +54,7 @@ export default function TabsLayout() {
       </Tabs>
       <OfflineNotice />
       <BiteAlerts />
+      <OnboardingTour />
     </View>
   );
 }

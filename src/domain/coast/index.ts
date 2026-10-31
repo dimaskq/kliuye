@@ -131,3 +131,91 @@ export function isSeaWithinReach(point: LatLng, tiles: readonly OceanTile[]): bo
   const distance = distanceToSeaKm(point, tiles);
   return distance !== undefined && distance <= SEA_REACH_KM;
 }
+
+/**
+ * Any water at all, as one tile of a vector map has it: `polygons` for fresh
+ * open water (lakes, reservoirs, ponds, wide rivers), `sea` for the `ocean`
+ * class, and `lines` for rivers and streams too narrow to have an outline.
+ */
+export type WaterTile = OceanTile & {
+  sea?: readonly Polygon[];
+  lines: readonly Ring[];
+};
+
+/** What water there is around a point — and so which fish can live there. */
+export type WaterAround = {
+  /** Any water at all: without it there is no index to show. */
+  water: boolean;
+  /** Fresh water: without it, a carp or a pike has nowhere to be. */
+  fresh: boolean;
+};
+
+/**
+ * How far a picked point may be from the water and still count as on it. An
+ * angler taps the bank, not the middle of the lake, and a river drawn as a line
+ * is wider than the line.
+ */
+export const PICKED_WATER_REACH_KM = 0.3;
+
+/**
+ * The same for the device's own position, which the app asks for only coarsely
+ * — a kilometre or two off — so standing on the bank must still count.
+ */
+export const LOCATED_WATER_REACH_KM = 2;
+
+/** Fine enough for a farm pond, coarse enough that 2 km needs few tiles. */
+export const WATER_TILE_ZOOM = 13;
+
+function distanceToLine(x: number, y: number, line: Ring): number {
+  if (line.length === 1) return Math.hypot(line[0]![0] - x, line[0]![1] - y);
+  let nearest = Infinity;
+  for (let i = 1; i < line.length; i += 1) {
+    nearest = Math.min(nearest, distanceToSegment(x, y, line[i - 1]!, line[i]!));
+  }
+  return nearest;
+}
+
+/**
+ * Kilometres from the point to the nearest water in the given tiles — any
+ * water, or with `freshOnly` everything but the sea — 0 on the water,
+ * `undefined` when the tiles hold none.
+ */
+export function distanceToWaterKm(
+  point: LatLng,
+  tiles: readonly WaterTile[],
+  freshOnly = false,
+): number | undefined {
+  let nearest = Infinity;
+
+  for (const { tile, extent, polygons, sea = [], lines } of tiles) {
+    const scale = extent * 2 ** tile.z;
+    const [x, y] = pointInTile(point, tile, extent);
+    for (const polygon of freshOnly ? polygons : [...polygons, ...sea]) {
+      nearest = Math.min(nearest, distanceToPolygon(x, y, polygon) / scale);
+    }
+    for (const line of lines) {
+      nearest = Math.min(nearest, distanceToLine(x, y, line) / scale);
+    }
+  }
+
+  return nearest === Infinity ? undefined : (nearest * metresPerWorldUnit(point.latitude)) / 1000;
+}
+
+function within(distance: number | undefined, reachKm: number): boolean {
+  return distance !== undefined && distance <= reachKm;
+}
+
+/**
+ * Whether the point is on water, and on fresh water, give or take `reachKm`.
+ * A pin off the Varna beach is on water, but not on any a carp could live in.
+ */
+export function waterAround(
+  point: LatLng,
+  tiles: readonly WaterTile[],
+  reachKm: number,
+): WaterAround {
+  return {
+    water: within(distanceToWaterKm(point, tiles), reachKm),
+    fresh: within(distanceToWaterKm(point, tiles, true), reachKm),
+  };
+}

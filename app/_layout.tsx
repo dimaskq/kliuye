@@ -1,13 +1,16 @@
+import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import type { Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useLeave } from '@/hooks';
 import { AppProviders } from '@/providers/AppProviders';
-import { ErrorScreen, colors } from '@/ui';
+import { ErrorScreen, HeaderBack, useColorTheme, useColors } from '@/ui';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -33,7 +36,52 @@ export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Pro
   );
 }
 
-export default function RootLayout() {
+/**
+ * Every page over the tabs gets the same way back — also when it was the first
+ * thing opened, after a reload or from a link, where the system arrow is
+ * missing. The journal form goes back to the journal; anything else to Today.
+ */
+function Back({ fallback }: { fallback: Href }): React.JSX.Element {
+  const { t } = useTranslation();
+  return <HeaderBack label={t('common.back')} onPress={useLeave(fallback)} />;
+}
+
+const backTo = (fallback: Href) => ({
+  headerShown: true,
+  headerLeft: () => <Back fallback={fallback} />,
+});
+
+/** The pages over the tabs, in the colours of the theme in use. */
+function RootStack(): React.JSX.Element {
+  const colors = useColors();
+  const scheme = useColorTheme();
+  return (
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+          headerStyle: { backgroundColor: colors.bg },
+          headerTintColor: colors.text,
+          headerTitle: '',
+          headerShadowVisible: false,
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="settings" options={backTo('/')} />
+        <Stack.Screen name="species" options={backTo('/')} />
+        <Stack.Screen name="catch" options={backTo('/diary')} />
+        <Stack.Screen name="about" options={backTo('/profile')} />
+        <Stack.Screen name="how-it-works" options={backTo('/')} />
+        <Stack.Screen name="licenses" options={backTo('/about')} />
+        <Stack.Screen name="dev-catalog" options={backTo('/')} />
+      </Stack>
+    </>
+  );
+}
+
+function RootLayout() {
   const [fontsLoaded] = useFonts(FONTS);
 
   useEffect(() => {
@@ -45,26 +93,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppProviders>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.bg },
-            headerStyle: { backgroundColor: colors.bg },
-            headerTintColor: colors.text,
-            headerTitle: '',
-            headerShadowVisible: false,
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="settings" options={{ headerShown: true }} />
-          <Stack.Screen name="species" options={{ headerShown: true }} />
-          <Stack.Screen name="catch" options={{ headerShown: true }} />
-          <Stack.Screen name="about" options={{ headerShown: true }} />
-          <Stack.Screen name="licenses" options={{ headerShown: true }} />
-          <Stack.Screen name="dev-catalog" options={{ headerShown: true }} />
-        </Stack>
+        <RootStack />
       </AppProviders>
     </SafeAreaProvider>
   );
 }
+
+/* Catches render errors for the crash report; sends nothing until the angler opts in. */
+export default Sentry.wrap(RootLayout);

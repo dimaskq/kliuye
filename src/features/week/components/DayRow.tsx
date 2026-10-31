@@ -5,13 +5,13 @@ import {
   ProgressTrack,
   Tag,
   Text,
-  colors,
   motion,
   radius,
   scoreTextColor,
   sizes,
   space,
   MIN_TOUCH_SIZE,
+  useColors,
 } from '@/ui';
 
 import type { DayRowModel, DayTag } from '../dayRows';
@@ -37,6 +37,7 @@ export type DayRowProps = {
 };
 
 function DaySummary({ row }: { row: DayRowModel }): React.JSX.Element {
+  const colors = useColors();
   return (
     <Animated.View style={{ flex: 1, gap: space.sm, minWidth: 0 }}>
       <ProgressTrack value={row.value} />
@@ -48,6 +49,7 @@ function DaySummary({ row }: { row: DayRowModel }): React.JSX.Element {
 }
 
 function DayTags({ tags }: { tags: readonly DayTag[] }): React.JSX.Element {
+  const colors = useColors();
   return (
     <Animated.View
       entering={tagsIn}
@@ -77,6 +79,7 @@ export function DayRow({
   accessibilityLabel,
   onPress,
 }: DayRowProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <AnimatedPressable
       accessibilityRole="button"
@@ -108,7 +111,7 @@ export function DayRow({
         <Text
           variant="numericMd"
           align="right"
-          color={scoreTextColor(row.value)}
+          color={scoreTextColor(row.value, colors)}
           style={{ width: sizes.weekScoreColumn }}
         >
           {row.value}

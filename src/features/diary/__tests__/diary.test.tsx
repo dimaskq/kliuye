@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import { StyleSheet } from 'react-native';
 
 import type { Attachment, Catch } from '@/domain/diary';
 import { CatchScreen, DiaryScreen } from '@/features/diary';
@@ -60,6 +61,34 @@ describe('DiaryScreen', () => {
       'accessibilityLabel',
       expect.stringContaining('2 фото'),
     );
+  });
+
+  it('shows the first photo large, and opens any photo full screen on a tap', async () => {
+    useDiary.setState({
+      catches: [seeded({ media: [photo(), photo({ id: 'm2' }), photo({ id: 'm3' })] })],
+    });
+    await renderWithProviders(<DiaryScreen />);
+    expect(screen.queryByLabelText('Закрити перегляд')).toBeNull();
+
+    await fireEvent.press(screen.getByLabelText('Відкрити фото 2 з 3'));
+
+    expect(screen.getByLabelText('Закрити перегляд')).toBeOnTheScreen();
+    expect(screen.getByText('2 / 3')).toBeOnTheScreen();
+    /* The photo itself, at a real size — not a black screen with a cross. */
+    const shown = screen.getByLabelText('Фото 2 з 3');
+    expect(shown).toHaveStyle({ width: expect.any(Number), height: expect.any(Number) });
+    const { height } = StyleSheet.flatten(shown.props.style) as { height: number };
+    expect(height).toBeGreaterThan(0);
+    await fireEvent.press(screen.getByLabelText('Закрити перегляд'));
+    expect(screen.queryByLabelText('Закрити перегляд')).toBeNull();
+  });
+
+  it('opens the photo, not the entry editor, when the photo is tapped', async () => {
+    useDiary.setState({ catches: [seeded({ media: [photo()] })] });
+    await renderWithProviders(<DiaryScreen />);
+    await fireEvent.press(screen.getByLabelText('Відкрити фото 1 з 1'));
+    expect(screen.getByLabelText('Закрити перегляд')).toBeOnTheScreen();
+    expect(screen.queryByText('2 / 3')).toBeNull();
   });
 
   it('lists an entry with what, how heavy, when and where', async () => {

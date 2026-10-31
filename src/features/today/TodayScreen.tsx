@@ -2,11 +2,13 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FeatureTour } from '@/features/onboarding';
+import { NoWaterCard } from '@/features/water';
 import { useCurrentForecast, useSpeciesScores, useSpotLabel } from '@/hooks';
 import { useDateFormat } from '@/hooks/useDateFormat';
 import { errorMessageKey } from '@/services/errors';
 import { useSelection } from '@/store';
-import { Screen, StaleBadge, StatusCard, screenPadding, space, MIN_TOUCH_SIZE } from '@/ui';
+import { Screen, StaleBadge, StatusCard, Text, screenPadding, space, MIN_TOUCH_SIZE } from '@/ui';
 
 import { LocationPrompt, RefreshBanner } from './components';
 import { TodayContent } from './TodayContent';
@@ -56,13 +58,27 @@ function ForecastError({ error, onRetry }: { error: unknown; onRetry: () => void
   );
 }
 
+/** A point on land has no index to show — only the way to a point on water. */
+function OnLand({ name }: { name: string }): React.JSX.Element {
+  return (
+    <Screen padding="today">
+      <Text variant="h2" accessibilityRole="header">
+        {name}
+      </Text>
+      <NoWaterCard />
+    </Screen>
+  );
+}
+
 /** Answers the one question: is it worth going out today? */
 export function TodayScreen(): React.JSX.Element {
-  /* The location dialog sits over every state — loading, error or forecast. */
+  /* The location dialog sits over every state — loading, error or forecast;
+     the tour of the screen waits for it, and for a forecast to point at. */
   return (
     <>
       <TodayBody />
       <LocationPrompt />
+      <FeatureTour />
     </>
   );
 }
@@ -76,6 +92,8 @@ function TodayBody(): React.JSX.Element {
   const { spot, model, forecast, isLoading, isRefreshing, error, isStale, refetch } = forecastState;
   const speciesScores = useSpeciesScores(forecast, spot, selectedHour);
   const { phase: refreshPhase, reloading, reload } = useReload(isRefreshing, refetch);
+
+  if (forecastState.onLand) return <OnLand name={labelOf(spot).name} />;
 
   if (isLoading) return <TodaySkeleton />;
 
@@ -100,6 +118,7 @@ function TodayBody(): React.JSX.Element {
         ) : null}
         <TodayContent
           model={model}
+          days={forecast.days}
           speciesId={speciesId}
           speciesScores={speciesScores}
           selectedHour={selectedHour}

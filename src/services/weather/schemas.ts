@@ -1,4 +1,4 @@
-import { array, nullable, number, object, schema, string } from '../validation';
+import { array, nullable, number, object, optional, schema, string } from '../validation';
 import type { Infer } from '../validation';
 
 /**
@@ -13,6 +13,7 @@ const forecastResponse = object({
   longitude: number,
   utc_offset_seconds: number,
   timezone: string,
+  elevation: optional(number),
   hourly: object({
     time: strings,
     temperature_2m: numbers,
@@ -41,6 +42,8 @@ const marineResponse = object({
   hourly: object({
     time: strings,
     sea_surface_temperature: numbers,
+    /* Includes the tide; older cached answers and inland points lack it. */
+    sea_level_height_msl: optional(numbers),
   }),
 });
 

@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { Card, Tag, Text, colors, radius, sizes, space } from '@/ui';
+import { Card, Tag, Text, radius, sizes, space, useColors } from '@/ui';
 
 export type TipRowProps = {
   index: number;
@@ -22,6 +22,7 @@ export function TipRow({
   species,
   emphasised,
 }: TipRowProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Card
       radiusToken="tipCard"

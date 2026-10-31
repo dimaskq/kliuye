@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useActiveSpot, useDeviceLocation } from '@/hooks';
-import { useLocation } from '@/store';
+import { useLocation, usePreferences } from '@/store';
 import { PermissionDialog } from '@/ui';
 
 /**
@@ -17,10 +17,12 @@ export function LocationPrompt(): React.JSX.Element {
   const { request } = useDeviceLocation();
   const { canOfferLocation } = useActiveSpot();
   const dismissPrompt = useLocation((state) => state.dismissPrompt);
+  /* Not over the first-launch tour: one thing at a time. */
+  const touring = usePreferences((state) => state.hydrated && !state.onboardingDone);
 
   return (
     <PermissionDialog
-      visible={canOfferLocation}
+      visible={canOfferLocation && !touring}
       title={t('locationPrompt.title')}
       body={t('locationPrompt.body')}
       reasons={[

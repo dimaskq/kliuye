@@ -1,6 +1,7 @@
-import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, View } from 'react-native';
 
-import { colors, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Card } from './Card';
 import { IconButton } from './IconButton';
@@ -26,10 +27,12 @@ export function Dialog({
   onClose,
   children,
 }: DialogProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      {/* Both platforms: edge-to-edge Android does not resize for the keyboard. */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
         style={{ flex: 1, justifyContent: 'center', padding: space.gap }}
       >
         <Pressable

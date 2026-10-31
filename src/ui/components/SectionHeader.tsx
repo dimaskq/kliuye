@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { colors, space } from '../tokens';
+import { useColors } from '../theme';
+import { space } from '../tokens';
 
 import { Text } from './Text';
 
@@ -12,6 +13,7 @@ export function SectionHeader({
   title: string;
   aside?: string;
 }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       style={{

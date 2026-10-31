@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { initialsOf } from '@/store';
-import { Button, Dialog, Text, TextField, colors, space } from '@/ui';
+import { Button, Dialog, Text, TextField, space, useColors } from '@/ui';
 
 import type { ProfileEditor } from '../useProfileEditor';
 
@@ -12,6 +12,7 @@ const PHOTO_SIZE = 112;
 const NAME_MAX_LENGTH = 40;
 
 function PhotoPicker({ editor }: { editor: ProfileEditor }): React.JSX.Element {
+  const colors = useColors();
   const { t } = useTranslation();
   const hasPhoto = editor.draft.photo !== '';
   return (

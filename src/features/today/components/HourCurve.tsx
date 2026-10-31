@@ -1,6 +1,6 @@
 import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop } from 'react-native-svg';
 
-import { clampForDisplay, colors, scoreFill, sizes } from '@/ui';
+import { clampForDisplay, scoreFill, sizes, useColors } from '@/ui';
 
 import { areaPath, chartPoints, smoothPath } from './curvePath';
 
@@ -45,6 +45,7 @@ function Marker({
   baselineY: number;
   fill: string;
 }) {
+  const colors = useColors();
   return (
     <>
       <Line

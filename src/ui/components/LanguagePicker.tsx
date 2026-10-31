@@ -3,7 +3,8 @@ import { Pressable, View } from 'react-native';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import type { Language } from '@/i18n';
 
-import { colors, radius, space, MIN_TOUCH_SIZE } from '../tokens';
+import { useColors } from '../theme';
+import { radius, space, MIN_TOUCH_SIZE } from '../tokens';
 
 import { Text } from './Text';
 
@@ -22,6 +23,7 @@ export function LanguagePicker({
   labels,
   onSelect,
 }: LanguagePickerProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       accessibilityRole="radiogroup"

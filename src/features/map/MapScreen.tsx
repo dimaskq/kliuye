@@ -9,17 +9,20 @@ import type { CustomPoint } from '@/domain/spots';
 import {
   useChoosePoint,
   useDeviceLocation,
+  useWaterAround,
   usePickPoint,
   useSpotLabel,
   useTilePrefetch,
 } from '@/hooks';
 import { usePoints, useSelection } from '@/store';
-import { Text, colors, radius, screenPadding, space } from '@/ui';
+import { Text, radius, screenPadding, space, useColors } from '@/ui';
 
 import {
   MapHeader,
+  MapLayerPicker,
   OVERLAY_Z,
-  PlaceSearch,
+  PlaceResults,
+  PlaceSearchField,
   PlacesDialog,
   PointActions,
   RouteDialog,
@@ -58,22 +61,37 @@ function useMapModel() {
     () => spotsNear(location.origin, customPoint),
     [location.origin, customPoint],
   );
-  const spots = useSpotScores(nearby, speciesId, selectedHour);
-  const selectedId = selectedSpotId ?? spots[0]?.id ?? '';
+  const selectedId = selectedSpotId ?? nearby[0]?.id ?? '';
+  const chosen = nearby.find((spot) => spot.id === selectedId);
+  const around = useWaterAround(chosen ?? { id: '', coordinates: { latitude: 0, longitude: 0 } });
+  const onLand = around?.water === false;
+  /* Out at sea the selected pin scores a carp as 0, the way Today does. */
+  const scored = useSpotScores(nearby, speciesId, selectedHour, {
+    spotId: selectedId,
+    freshwaterNearby: around?.fresh,
+  });
+  /* A pin on land carries no number: there is no bite to forecast there. */
+  const spots = useMemo(
+    () =>
+      onLand
+        ? scored.map((spot) => (spot.id === selectedId ? { ...spot, value: undefined } : spot))
+        : scored,
+    [onLand, scored, selectedId],
+  );
   const selected = spots.find((spot) => spot.id === selectedId);
 
   useTilePrefetch(usePrefetchAreas(spots, selectedId, favourites));
 
-  return { location, customPoint, setSpot, spots, selectedId, selected };
+  return { location, customPoint, setSpot, spots, selectedId, selected, onLand };
 }
 
 type MapModel = ReturnType<typeof useMapModel>;
 
 const BELOW_ATTRIBUTION = space.gap * 2 + space.md;
 
-/** Until a pin is down, the map says what a tap on it does. */
-function PickHint(): React.JSX.Element {
-  const { t } = useTranslation();
+/** Until a pin is down, the map says what a tap on it does; on land, that it missed the water. */
+function PickHint({ text }: { text: string }): React.JSX.Element {
+  const colors = useColors();
   return (
     <View
       pointerEvents="none"
@@ -83,23 +101,26 @@ function PickHint(): React.JSX.Element {
         top: BELOW_ATTRIBUTION,
         alignSelf: 'center',
         zIndex: OVERLAY_Z,
-        backgroundColor: colors.text,
+        backgroundColor: colors.ink,
         borderRadius: radius.pill,
         paddingVertical: space.sm,
         paddingHorizontal: space.xxl,
       }}
     >
-      <Text variant="emphasisSm" color={colors.bg}>
-        {t('map.pickHint')}
+      <Text variant="emphasisSm" color={colors.onInk}>
+        {text}
       </Text>
     </View>
   );
 }
 
-type TopBarProps = { onFocusPin: () => void; onOpenPlaces: () => void };
+type TopBarProps = {
+  onFocusPin: () => void;
+  onOpenPlaces: () => void;
+  search: PlaceSearchState;
+};
 
-function TopBar({ onFocusPin, onOpenPlaces }: TopBarProps): React.JSX.Element {
-  const choosePoint = useChoosePoint();
+function TopBar({ onFocusPin, onOpenPlaces, search }: TopBarProps): React.JSX.Element {
   return (
     <View
       style={{
@@ -111,10 +132,23 @@ function TopBar({ onFocusPin, onOpenPlaces }: TopBarProps): React.JSX.Element {
       }}
     >
       <MapHeader onFocusPin={onFocusPin} onOpenPlaces={onOpenPlaces} />
-      <PlaceSearch onPick={choosePoint} />
+      <PlaceSearchField query={search.query} onChange={search.setQuery} onPick={search.pick} />
     </View>
   );
 }
+
+/** The search text, shared by the field in the header and the list over the map. */
+function usePlaceSearchState() {
+  const choosePoint = useChoosePoint();
+  const [query, setQuery] = useState('');
+  const pick = (point: CustomPoint): void => {
+    setQuery('');
+    choosePoint(point);
+  };
+  return { query, setQuery, pick, open: query.trim() !== '' };
+}
+
+type PlaceSearchState = ReturnType<typeof usePlaceSearchState>;
 
 type DialogsProps = { model: MapModel; actions: ReturnType<typeof useMapDialogs> };
 
@@ -145,11 +179,14 @@ function Dialogs({ model, actions }: DialogsProps): React.JSX.Element {
 
 /** Where to fish: find a place or drop a pin, then open, route to, or keep it. */
 export function MapScreen(): React.JSX.Element {
+  const colors = useColors();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const pickPoint = usePickPoint();
   const model = useMapModel();
   const actions = useMapDialogs(model.customPoint);
   const [focusRequest, setFocusRequest] = useState(0);
+  const search = usePlaceSearchState();
   const pinned = model.selectedId === CUSTOM_SPOT_ID && model.customPoint !== undefined;
   /* Nobody needs a route to where they already stand. */
   const routable = model.selected !== undefined && model.selectedId !== CURRENT_LOCATION_SPOT_ID;
@@ -159,22 +196,27 @@ export function MapScreen(): React.JSX.Element {
       <TopBar
         onFocusPin={() => setFocusRequest((count) => count + 1)}
         onOpenPlaces={() => actions.show('places')}
+        search={search}
       />
       <View style={{ flex: 1 }}>
         <SpotMap
           spots={model.spots}
           selectedId={model.selectedId}
           onSelect={model.setSpot}
-          onPickPoint={pickPoint}
+          /* With the list open, a tap on the map only closes it. */
+          onPickPoint={search.open ? () => search.setQuery('') : pickPoint}
           userLocation={model.location.origin}
           focusRequest={focusRequest}
         />
-        {pinned ? null : <PickHint />}
+        {model.onLand ? <PickHint text={t('water.noWaterHint')} /> : null}
+        {pinned || model.onLand ? null : <PickHint text={t('map.pickHint')} />}
         <PointActions
           onOpen={actions.open}
           onRoute={routable ? () => actions.show('route') : undefined}
           onSave={pinned ? () => actions.show('save') : undefined}
         />
+        <MapLayerPicker />
+        <PlaceResults query={search.query} onPick={search.pick} />
       </View>
       <Dialogs model={model} actions={actions} />
     </View>
